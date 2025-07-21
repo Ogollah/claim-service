@@ -43,7 +43,6 @@ class ApiClientService {
         error: error.message,
         claimId: fhirBundle.id
       });
-
       return {
         success: false,
         status: error.response?.status || 500,
