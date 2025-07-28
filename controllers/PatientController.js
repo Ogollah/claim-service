@@ -25,13 +25,13 @@ const patientController = {
         }
     },
 
-    serchPatient: async(req, res) => {
+    searchPatient: async(req, res) => {
         try {
-            const{ query } = req.body.query;
+            const{ query } = req.params.query;
             if (!query) {
                 return res.status(400).json({message: 'Search parameter required'})
             }
-            const [patient] = await Patient.serchPatient(id);
+            const [patient] = await Patient.search(query);
             res.json(patient);
         } catch (error) {
            console.error(error);
@@ -50,3 +50,5 @@ const patientController = {
     }
 
 }
+
+module.exports = patientController;

@@ -1,7 +1,7 @@
 const Intervention = require('../models/Intervention');
 const pool = require('../config/db');
 
-const nterventionController = {
+const interventionController = {
     createIntervention: async(req, res) => {
         try{
             const {code, name} = req.body;
@@ -25,7 +25,7 @@ const nterventionController = {
         }
     },
 
-    serchIntervention: async(req, res) => {
+    searchIntervention: async(req, res) => {
         try {
             const{ query } = req.body.query;
             if (!query) {
@@ -50,3 +50,5 @@ const nterventionController = {
     }
 
 }
+
+module.exports = interventionController;

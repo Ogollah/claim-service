@@ -1,7 +1,7 @@
 const TestCase = require('../models/TestCase');
 const pool = require('../config/db');
 
-const TestCaseController = {
+const testCaseController = {
     createTestCase: async(req, res) => {
         try{
             const {name, description, test_config} = req.body;
@@ -25,7 +25,7 @@ const TestCaseController = {
         }
     },
 
-    serchTestCase: async(req, res) => {
+    searchTestCase: async(req, res) => {
         try {
             const{ query } = req.body.query;
             if (!query) {
@@ -51,3 +51,5 @@ const TestCaseController = {
     }
 
 }
+
+module.exports = testCaseController;

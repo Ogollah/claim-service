@@ -25,7 +25,7 @@ const practitionerController = {
         }
     },
 
-    serchPractitioner: async(req, res) => {
+    searchPractitioner: async(req, res) => {
         try {
             const{ query } = req.body.query;
             if (!query) {
@@ -50,3 +50,5 @@ const practitionerController = {
     }
 
 }
+
+module.exports = practitionerController;

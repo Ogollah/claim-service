@@ -25,7 +25,7 @@ const providerController = {
         }
     },
 
-    serchProvider: async(req, res) => {
+    searchProvider: async(req, res) => {
         try {
             const{ query } = req.body.query;
             if (!query) {
@@ -50,3 +50,5 @@ const providerController = {
     }
 
 }
+
+module.exports = providerController;

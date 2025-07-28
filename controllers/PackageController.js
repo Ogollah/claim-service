@@ -25,7 +25,7 @@ const packageController = {
         }
     },
 
-    serchPackage: async(req, res) => {
+    searchPackage: async(req, res) => {
         try {
             const{ query } = req.body.query;
             if (!query) {
@@ -50,3 +50,5 @@ const packageController = {
     }
 
 }
+
+module.exports = packageController;
