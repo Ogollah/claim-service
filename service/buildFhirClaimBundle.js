@@ -7,7 +7,18 @@ const {
 } = require('../utils/constants');
 
 class FhirClaimBundleService {
-  transformFormToFhirBundle(formData) {
+
+  _getClaimUseType(formData, preAuthResponseId) {
+    if (formData.use?.id === 'preauthorization' && !preAuthResponseId) {
+      return 'preauthorization';
+    }
+    if (preAuthResponseId || formData.use?.id === 'claim') {
+      return 'claim';
+    }
+    return undefined;
+  }
+
+  transformFormToFhirBundle(formData, preAuthResponseId = null) {
     // Create the base payload
     const transformedPayload = {
       meta: {
@@ -27,6 +38,8 @@ class FhirClaimBundleService {
     transformedPayload.entry.push(this._createPatientEntry(formData.patient));
     transformedPayload.entry.push(this._createClaimEntry(formData));
     const payload = JSON.parse(JSON.stringify(transformedPayload));
+    console.info('Transformed FHIR Bundle:', JSON.stringify(payload, null, 2));
+    
 
     return payload;
   }
@@ -156,7 +169,7 @@ class FhirClaimBundleService {
     };
   }
 
-  _createClaimEntry(formData) {
+  _createClaimEntry(formData, preAuthResponseId) {
     return {
       fullUrl: `https://qa-mis.apeiro-digital.com/fhir/Claim/${uuidv4()}`,
       resource: {
@@ -276,6 +289,7 @@ class FhirClaimBundleService {
             }
           }
         ],
+        related: preAuthResponseId ? this._createRelatedPreAuthEntry(preAuthResponseId) : [],
         extension: [
           {
             extension: [
@@ -326,7 +340,7 @@ class FhirClaimBundleService {
             }
           ]
         },
-        use: "claim",
+        use: this._getClaimUseType(formData, preAuthResponseId),
         item: formData.productOrService.map((item, idx) => ({
           sequence: idx + 1,
           productOrService: {
@@ -357,6 +371,28 @@ class FhirClaimBundleService {
         }))
       }
     };
+  }
+
+  _createRelatedPreAuthEntry(preAuthResponseId) {
+    return [
+              {
+            claim: {
+                identifier: {
+                    system: "https://fhir.sha.go.ke/fhir/claim",
+                    value: preAuthResponseId
+                }
+            },
+            relationship: {
+                coding: [
+                    {
+                        system: "https://fhir.sha.go.ke/fhir/CodeSystem/claim-relation-type",
+                        code: "pre-auth"
+                    }
+                ],
+                text: "Preauthorization"
+            }
+        }
+    ];
   }
 }
 
