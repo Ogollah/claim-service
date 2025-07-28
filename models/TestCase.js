@@ -2,9 +2,9 @@ const pool = require("../config/db");
 
 class TestCase {
     static async create(testcase){
-        const {} = testcase;
+        const {name, description, test_config} = testcase;
         const [result] = await pool.query(
-            'INSERT INTO testcase(name, description, test_config) VALUES(?,?,?), [name, description, test_config]'
+            'INSERT INTO testcase(name, description, test_config) VALUES(?,?,?)', [name, description, test_config]
         );
         return result.insertId;
     }

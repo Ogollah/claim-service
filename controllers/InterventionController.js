@@ -1,48 +1,48 @@
-const Patient = require('../models/Patient');
+const Intervention = require('../models/Intervention');
 const pool = require('../config/db');
 
-const patientController = {
-    createPatient: async(req, res) => {
+const nterventionController = {
+    createIntervention: async(req, res) => {
         try{
-            const {cd_id, name, gender, birthdate, national_id, email} = req.body;
-            const patient = await Patient.create({
-                cd_id, name, gender, birthdate, national_id, email
+            const {code, name} = req.body;
+            const intervention = await Intervention.create({
+                code, name
             });
-            res.status(201).json({message: 'Patient created successfully', patient});
+            res.status(201).json({message: 'Intervention created successfully', intervention});
         } catch (error) {
             console.error(error);
             res.status(500).json({message: 'Server error'});
         }
     },
 
-    getAllPatients: async(req, res) => {
+    getAllInterventions: async(req, res) => {
         try {
-            const patinets = await Patient.getall();
-            res.json(patinets);
+            const intervention = await Intervention.getall();
+            res.json(intervention);
         } catch (error) {
             console.error(error);
             res.status(500).json({message: 'Server error'});
         }
     },
 
-    serchPatient: async(req, res) => {
+    serchIntervention: async(req, res) => {
         try {
             const{ query } = req.body.query;
             if (!query) {
                 return res.status(400).json({message: 'Search parameter required'})
             }
-            const [patient] = await Patient.serchPatient(id);
-            res.json(patient);
+            const [intervention] = await Intervention.search(query);
+            res.json(intervention);
         } catch (error) {
            console.error(error);
            res.status(500).json({message: 'Server error'}); 
         }
     },
 
-    deletePatient: async(req, res) => {
+    deleteIntervention: async(req, res) => {
         try {
-            await Patient.delete(req.params.id);
-            res.json({message: 'Patient deleted successfuly'});
+            await Intervention.delete(req.params.id);
+            res.json({message: 'Intervention deleted successfuly'});
         } catch (error) {
             console.error(error);
             res.status(500).json({message: 'Server error'});

@@ -1,48 +1,48 @@
-const Patient = require('../models/Patient');
+const Package = require('../models/Package');
 const pool = require('../config/db');
 
-const patientController = {
-    createPatient: async(req, res) => {
+const packageController = {
+    createPackage: async(req, res) => {
         try{
-            const {cd_id, name, gender, birthdate, national_id, email} = req.body;
-            const patient = await Patient.create({
-                cd_id, name, gender, birthdate, national_id, email
+            const {code, name} = req.body;
+            const package = await Package.create({
+                code, name
             });
-            res.status(201).json({message: 'Patient created successfully', patient});
+            res.status(201).json({message: 'Package created successfully', package});
         } catch (error) {
             console.error(error);
             res.status(500).json({message: 'Server error'});
         }
     },
 
-    getAllPatients: async(req, res) => {
+    getAllPackages: async(req, res) => {
         try {
-            const patinets = await Patient.getall();
-            res.json(patinets);
+            const package = await Package.getall();
+            res.json(package);
         } catch (error) {
             console.error(error);
             res.status(500).json({message: 'Server error'});
         }
     },
 
-    serchPatient: async(req, res) => {
+    serchPackage: async(req, res) => {
         try {
             const{ query } = req.body.query;
             if (!query) {
                 return res.status(400).json({message: 'Search parameter required'})
             }
-            const [patient] = await Patient.serchPatient(id);
-            res.json(patient);
+            const [package] = await Package.search(query);
+            res.json(package);
         } catch (error) {
            console.error(error);
            res.status(500).json({message: 'Server error'}); 
         }
     },
 
-    deletePatient: async(req, res) => {
+    deletePackage: async(req, res) => {
         try {
-            await Patient.delete(req.params.id);
-            res.json({message: 'Patient deleted successfuly'});
+            await Package.delete(req.params.id);
+            res.json({message: 'Package deleted successfuly'});
         } catch (error) {
             console.error(error);
             res.status(500).json({message: 'Server error'});

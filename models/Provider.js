@@ -2,9 +2,9 @@ const pool = require("../config/db");
 
 class Provider {
     static async create(provider){
-        const {} = provider;
+        const {f_id, name, level, slade_code, status} = provider;
         const [result] = await pool.query(
-            'INSERT INTO provider(f_id, name, level, slade_code, status) VALUES(?,?,?,?,?), [f_id, name, level, slade_code, status]'
+            'INSERT INTO provider(f_id, name, level, slade_code, status) VALUES(?,?,?,?,?)', [f_id, name, level, slade_code, status]
         );
         return result.insertId;
     }

@@ -2,9 +2,9 @@ const pool = require("../config/db");
 
 class Intervention {
     static async create(intervention){
-        const {} = intervention;
+        const {code, name} = intervention;
         const [result] = await pool.query(
-            'INSERT INTO intervention(code, name) VALUES(?,?), [code, name]'
+            'INSERT INTO intervention(code, name) VALUES(?,?)', [code, name]
         );
         return result.insertId;
     }

@@ -2,9 +2,9 @@ const pool = require("../config/db");
 
 class Package {
     static async create(package){
-        const {} = package;
+        const {code, name} = package;
         const [result] = await pool.query(
-            'INSERT INTO package(code, name) VALUES(?,?), [code, name]'
+            'INSERT INTO package(code, name) VALUES(?,?)', [code, name]
         );
         return result.insertId;
     }
