@@ -1,8 +1,8 @@
 const pool = require("../config/db");
 
 class Package {
-    static async create(package){
-        const {code, name} = package;
+    static async create(shaPackage){
+        const {code, name} = shaPackage;
         const [result] = await pool.query(
             'INSERT INTO package(code, name) VALUES(?,?)', [code, name]
         );

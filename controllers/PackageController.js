@@ -5,10 +5,10 @@ const packageController = {
     createPackage: async(req, res) => {
         try{
             const {code, name} = req.body;
-            const package = await Package.create({
+            const shaPackage = await Package.create({
                 code, name
             });
-            res.status(201).json({message: 'Package created successfully', package});
+            res.status(201).json({message: 'Package created successfully', shaPackage});
         } catch (error) {
             console.error(error);
             res.status(500).json({message: 'Server error'});
@@ -17,8 +17,8 @@ const packageController = {
 
     getAllPackages: async(req, res) => {
         try {
-            const package = await Package.getall();
-            res.json(package);
+            const shaPackage = await Package.getall();
+            res.json(shaPackage);
         } catch (error) {
             console.error(error);
             res.status(500).json({message: 'Server error'});
@@ -31,8 +31,8 @@ const packageController = {
             if (!query) {
                 return res.status(400).json({message: 'Search parameter required'})
             }
-            const [package] = await Package.search(query);
-            res.json(package);
+            const [shaPackage] = await Package.search(query);
+            res.json(shaPackage);
         } catch (error) {
            console.error(error);
            res.status(500).json({message: 'Server error'}); 
