@@ -5,7 +5,7 @@ async function initializeDatabase() {
   try {
     // Create tables if they don't exist
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS patient (
+        CREATE TABLE IF NOT EXISTS patient (
         id INT AUTO_INCREMENT PRIMARY KEY,
         cr_id VARCHAR(255) NOT NULL,
         name VARCHAR(255) NOT NULL,
@@ -18,9 +18,9 @@ async function initializeDatabase() {
     `);
 
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS provider (
+        CREATE TABLE IF NOT EXISTS provider (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        fid VARCHAR(255) NOT NULL,
+        f_id VARCHAR(255) NOT NULL,
         name VARCHAR(255) NOT NULL UNIQUE,
         level VARCHAR(255) NOT NULL,
         slade_code VARCHAR(255),
@@ -30,20 +30,21 @@ async function initializeDatabase() {
     `);
 
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS practitioner (
+        CREATE TABLE IF NOT EXISTS practitioner (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        puid VARCHAR(255) NOT NULL,
+        pu_id VARCHAR(255) NOT NULL,
         phone VARCHAR(255),
         email VARCHAR(255),
         address VARCHAR(255),
         gender VARCHAR(255) NOT NULL,
+        national_id VARCHAR(255),
         status INT,
         name VARCHAR(255) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
         await pool.query(`
-      CREATE TABLE IF NOT EXISTS package (
+        CREATE TABLE IF NOT EXISTS package (
         id INT AUTO_INCREMENT PRIMARY KEY,
         code VARCHAR(255) NOT NULL,
         phone VARCHAR(255),
@@ -51,13 +52,23 @@ async function initializeDatabase() {
       )
     `);
         await pool.query(`
-      CREATE TABLE IF NOT EXISTS intervention (
+        CREATE TABLE IF NOT EXISTS intervention (
         id INT AUTO_INCREMENT PRIMARY KEY,
         code VARCHAR(255) NOT NULL,
         name VARCHAR(255),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS testcase (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      description TEXT,
+      test_config JSON NOT NULL,  -- This is the JSON column
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  )
+`);
     
     console.log('Database initialization completed successfully');
   } catch (error) {

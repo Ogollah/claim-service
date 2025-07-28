@@ -1,22 +1,22 @@
 const pool = require("../config/db");
 
-class Practitioner {
-    static async create(practitioner){
-        const {} = practitioner;
+class Intervention {
+    static async create(intervention){
+        const {} = intervention;
         const [result] = await pool.query(
-            'INSERT INTO practitioner(pu_id, name, gender, phone, address, national_id, email, status) VALUES(?,?,?,?,?,?,?,?), [pu_id, name, gender, phone, address, national_id, email, status]'
+            'INSERT INTO intervention(code, name) VALUES(?,?), [code, name]'
         );
         return result.insertId;
     }
 
     static async getall(){
         const [rows] = await pool.query(`
-            SELECT * FROM practitioner ORDER BY created_at DESC
+            SELECT * FROM intervention ORDER BY created_at DESC
             `);
             return rows;
     }
     static async search(search) {
-        let query = 'SELECT * FROM practitioners WHERE 1=1';
+        let query = 'SELECT * FROM interventions WHERE 1=1';
         const params = [];
 
         if (search.cr_id) {
@@ -34,9 +34,9 @@ class Practitioner {
         return rows;
     }
     static async delete(id){
-        const [result] = await pool.query(`DELETE FROM practitioner WHERE id = ?`, [id]);
+        const [result] = await pool.query(`DELETE FROM intervention WHERE id = ?`, [id]);
         return result.affectedRows;
     }
 }
 
-module.exports = Practitioner;
+module.exports = Intervention;

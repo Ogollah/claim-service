@@ -1,22 +1,22 @@
 const pool = require("../config/db");
 
-class Practitioner {
-    static async create(practitioner){
-        const {} = practitioner;
+class TestCase {
+    static async create(testcase){
+        const {} = testcase;
         const [result] = await pool.query(
-            'INSERT INTO practitioner(pu_id, name, gender, phone, address, national_id, email, status) VALUES(?,?,?,?,?,?,?,?), [pu_id, name, gender, phone, address, national_id, email, status]'
+            'INSERT INTO testcase(name, description, test_config) VALUES(?,?,?), [name, description, test_config]'
         );
         return result.insertId;
     }
 
     static async getall(){
         const [rows] = await pool.query(`
-            SELECT * FROM practitioner ORDER BY created_at DESC
+            SELECT * FROM testcase ORDER BY created_at DESC
             `);
             return rows;
     }
     static async search(search) {
-        let query = 'SELECT * FROM practitioners WHERE 1=1';
+        let query = 'SELECT * FROM testcases WHERE 1=1';
         const params = [];
 
         if (search.cr_id) {
@@ -34,9 +34,9 @@ class Practitioner {
         return rows;
     }
     static async delete(id){
-        const [result] = await pool.query(`DELETE FROM practitioner WHERE id = ?`, [id]);
+        const [result] = await pool.query(`DELETE FROM testcase WHERE id = ?`, [id]);
         return result.affectedRows;
     }
 }
 
-module.exports = Practitioner;
+module.exports = TestCase;
