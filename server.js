@@ -3,6 +3,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const claimRoutes = require('./routes/claimRoutes');
+const PatientRoutes = require('./routes/PatientRoutes');
+const PractitionerRoutes = require('./routes/PractitionerRoutes');
+const ProviderRoutes = require('./routes/ProviderRoutes');
+const PackageRoutes = require('./routes/PackageRoutes');
+const InterventionRoutes = require('./routes/InterventionRoutes');
+const TestCaseRoutes = require('./routes/TestCaseRoutes');
 const logger = require('./utils/logger');
 
 const app = express();
@@ -17,6 +23,13 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Routes
 app.use('/api/claims', claimRoutes);
 
+app.use('/api/patients', PatientRoutes);
+app.use('/api/practitioners', PractitionerRoutes);
+app.use('/api/providers', ProviderRoutes);
+app.use('/api/packages', PackageRoutes);
+app.use('/api/interventions', InterventionRoutes);
+app.use('/api/test-cases', TestCaseRoutes);
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'healthy' });
@@ -28,7 +41,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);
 });
