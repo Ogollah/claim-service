@@ -5,7 +5,8 @@ const FHIR_SERVER = {
     PATIENT: 'Patient',
     ORGANIZATION: 'Organization',
     CLAIM: 'Claim',
-    COVERAGE: 'Coverage'
+    COVERAGE: 'Coverage',
+    PRACTITIONER: 'Practitioner',
   },
   VALUE_STRINGS: {
     SHA: 'SOCIAL HEALTH AUTHORITY',
@@ -22,6 +23,7 @@ const FHIR_RESOURCES = {
     PROVIDER_LICENSE: `${FHIR_SERVER.BASE_URL}/license/provider-license`,
     SLADE_CODE: `${FHIR_SERVER.BASE_URL}/identifier/sladecode`,
     STRUCTURED_DEFINATION: `${FHIR_SERVER.BASE_URL}/StructureDefinition/bundle|1.0.0`,
+    PRAC_STRUCTURE_DEF: `${FHIR_SERVER.BASE_URL}/StructureDefinition/practitioner|1.0.0`,
     PATIENT: `${FHIR_SERVER.BASE_URL}/Patient`,
   },
   CODE_SYSTEMS: {

@@ -34,6 +34,7 @@ class FhirClaimBundleService {
     };
     // Add entries for Coverage, Organization, Patient, and Claim
     transformedPayload.entry.push(this._createCoverageEntry(formData.patient));
+    transformedPayload.entry.push(this._createPractitionerEntry(formData.practitioner));
     transformedPayload.entry.push(this._createOrganizationEntry(formData.provider));
     transformedPayload.entry.push(this._createPatientEntry(formData.patient));
     transformedPayload.entry.push(this._createClaimEntry(formData));
@@ -393,6 +394,68 @@ class FhirClaimBundleService {
             }
         }
     ];
+  }
+  _createPractitionerEntry(practitionerData){
+    return {
+      fullUrl:`${FHIR_SERVER.BASE_URL}/${FHIR_SERVER.PATHS.PRACTITIONER}/${practitionerData.id}`,
+      resource: {
+        id: practitionerData.id,
+        meta: {
+          profile:[
+            `${FHIR_RESOURCES.IDENTIFIER_SYSTEMS.PRAC_STRUCTURE_DEF}`
+          ]
+        },
+        active: practitionerData.status,
+        gender: practitionerData.gender,
+        qualification:[
+          {
+            code: {
+              text: practitionerData.qualification,
+            }
+          }
+        ],
+        identifier: [
+          {
+            use: "official",
+            system: `${FHIR_SERVER.BASE_URL}/${FHIR_SERVER.PATHS.PRACTITIONER}/PractitionerRegistrationNumber`,
+            value: practitionerData.regNumber
+          },
+          {
+            use: "official",
+            system: `${FHIR_SERVER.BASE_URL}/${FHIR_SERVER.PATHS.PRACTITIONER}/SladeCode`,
+            value: practitionerData.sladeCode
+          },
+          {
+            use: "official",
+            system: `${FHIR_SERVER.BASE_URL}/${FHIR_SERVER.PATHS.PRACTITIONER}/PractitionerRegistryID`,
+            value: practitionerData.regID
+          },
+          {
+            value: practitionerData.nationalID,
+            use: "official",
+            system: `${FHIR_SERVER.BASE_URL}/${FHIR_SERVER.PATHS.PRACTITIONER}/National_ID`
+          }
+        ],
+        name: [
+          {
+            text: practitionerData.name
+          }
+        ],
+        telecom: [
+          {value: practitionerData.phone},
+          {
+            system: "email",
+            value: practitionerData.email
+          },
+        ],
+        address: [
+          {
+            text: practitionerData.address
+          }
+        ],
+        resourceType: "Practitioner"
+      }
+    }
   }
 }
 
