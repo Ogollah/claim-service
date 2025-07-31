@@ -34,10 +34,12 @@ class FhirClaimBundleService {
     };
     // Add entries for Coverage, Organization, Patient, and Claim
     transformedPayload.entry.push(this._createCoverageEntry(formData.patient));
+    if(formData.practitioner != null){
     transformedPayload.entry.push(this._createPractitionerEntry(formData.practitioner));
+    }
     transformedPayload.entry.push(this._createOrganizationEntry(formData.provider));
     transformedPayload.entry.push(this._createPatientEntry(formData.patient));
-    transformedPayload.entry.push(this._createClaimEntry(formData));
+    transformedPayload.entry.push(this._createClaimEntry(formData, preAuthResponseId));
     const payload = JSON.parse(JSON.stringify(transformedPayload));
     console.info('Transformed FHIR Bundle:', JSON.stringify(payload, null, 2));
     
@@ -410,7 +412,7 @@ class FhirClaimBundleService {
         qualification:[
           {
             code: {
-              text: practitionerData.qualification,
+              text: practitionerData.qualification[0].text,
             }
           }
         ],
@@ -428,7 +430,7 @@ class FhirClaimBundleService {
           {
             use: "official",
             system: `${FHIR_SERVER.BASE_URL}/${FHIR_SERVER.PATHS.PRACTITIONER}/PractitionerRegistryID`,
-            value: practitionerData.regID
+            value: practitionerData.id
           },
           {
             value: practitionerData.nationalID,
