@@ -47,6 +47,10 @@ Copy `.env` and update values as needed:
 PORT=5000
 API_BASE_URL=https://qa-payers.apeiro-digital.com/api/v1/
 API_KEY=your-api-key
+DB_USER=yourusername
+DB_HOST=127.0.0.1
+DB_PASSWORD=yourpassord
+DB_NAME=claim
 ```
 
 ### Running the Server
