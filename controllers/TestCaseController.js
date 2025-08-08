@@ -4,9 +4,9 @@ const pool = require('../config/db');
 const testCaseController = {
     createTestCase: async(req, res) => {
         try{
-            const {name, description, test_config} = req.body;
+            const {intervention_id, name, description, test_config} = req.body;
             const testCase = await TestCase.create({
-                name, description, test_config
+               intervention_id, name, description, test_config
             });
             res.status(201).json({message: 'Test case created successfully', testCase});
         } catch (error) {

@@ -2,9 +2,9 @@ const pool = require("../config/db");
 
 class Intervention {
     static async create(intervention){
-        const {code, name} = intervention;
+        const {package_id, code, name} = intervention;
         const [result] = await pool.query(
-            'INSERT INTO intervention(code, name) VALUES(?,?)', [code, name]
+            'INSERT INTO intervention(code, name) VALUES(?,?,?)', [package_id, code, name]
         );
         return result.insertId;
     }
@@ -36,6 +36,10 @@ class Intervention {
     static async delete(id){
         const [result] = await pool.query(`DELETE FROM intervention WHERE id = ?`, [id]);
         return result.affectedRows;
+    }
+    static async getInterventionByPackageId(package_id){
+        const [res] = await pool.query(`SELECT * FROM intervention WHERE package_id = ?`, [package_id]);
+        return res;
     }
 }
 

@@ -2,9 +2,9 @@ const pool = require("../config/db");
 
 class Patient {
     static async create(patient){
-        const {cd_id, name, gender, birthdate, national_id, email} = patient;
+        const {cr_id, name, gender, birthdate, national_id, email, system_value} = patient;
         const [result] = await pool.query(
-            'INSERT INTO patient(cr_id, name, gender, birtdate, national_id, email) VALUES(?,?,?,?,?,?)', [cd_id, name, gender, birthdate, national_id, email]
+            'INSERT INTO patient(cr_id, name, gender, birthdate, national_id, email, system_value) VALUES(?,?,?,?,?,?,?)', [cr_id, name, gender, birthdate, national_id, email, system_value]
         );
         return result.insertId;
     }
@@ -36,6 +36,12 @@ class Patient {
     static async delete(id){
         const [result] = await pool.query(`DELETE FROM patient WHERE id = ?`, [id]);
         return result.affectedRows;
+    }
+    static async getByCrID(crId) {
+        console.log('this id crid: ', crId);
+        
+        const [res] = await pool.query('SELECT * FROM patient WHERE cr_id = ?', [crId]);
+        return res[0];
     }
 }
 

@@ -47,8 +47,17 @@ const providerController = {
             console.error(error);
             res.status(500).json({message: 'Server error'});
         }
+    },
+    getProviderByFID: async(req, res) => {
+        try {
+            const { fID } = req.params;
+            const providers = await Provider.getProviderByFID(fID);
+            res.json(providers);
+        } catch (error) {
+            console.error('Error fetching provider: ', error);
+            
+        }
     }
-
 }
 
 module.exports = providerController;

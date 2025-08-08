@@ -4,9 +4,9 @@ const pool = require('../config/db');
 const interventionController = {
     createIntervention: async(req, res) => {
         try{
-            const {code, name} = req.body;
+            const {package_id, code, name} = req.body;
             const intervention = await Intervention.create({
-                code, name
+                package_id,code, name
             });
             res.status(201).json({message: 'Intervention created successfully', intervention});
         } catch (error) {
@@ -47,8 +47,17 @@ const interventionController = {
             console.error(error);
             res.status(500).json({message: 'Server error'});
         }
+    },
+    getInterventionByPackageId: async(req, res) => {
+        try {
+            const { package_id } = req.params
+            const intervention = await Intervention.getInterventionByPackageId(package_id);
+            res.json(intervention);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({message: 'Server error'});
+        }
     }
-
 }
 
 module.exports = interventionController;

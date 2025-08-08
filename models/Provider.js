@@ -37,6 +37,10 @@ class Provider {
         const [result] = await pool.query(`DELETE FROM provider WHERE id = ?`, [id]);
         return result.affectedRows;
     }
+    static async getProviderByFID(f_id) {
+        const [rows] = await pool.query(`SELECT * FROM provider WHERE f_id = ?`, [f_id]);
+        return rows[0];
+    }
 }
 
 module.exports = Provider;

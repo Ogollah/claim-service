@@ -2,9 +2,9 @@ const pool = require("../config/db");
 
 class Practitioner {
     static async create(practitioner){
-        const {pu_id, name, gender, phone, address, national_id, email, status} = practitioner;
+        const {pu_id, name, gender, phone, address, national_id, email, status, slade_code, reg_number} = practitioner;
         const [result] = await pool.query(
-            'INSERT INTO practitioner(pu_id, name, gender, phone, address, national_id, email, status) VALUES(?,?,?,?,?,?,?,?)', [pu_id, name, gender, phone, address, national_id, email, status]
+            'INSERT INTO practitioner(pu_id, name, gender, phone, address, national_id, email, status, slade_code, reg_number) VALUES(?,?,?,?,?,?,?,?,?,?)', [pu_id, name, gender, phone, address, national_id, email, status, slade_code, reg_number]
         );
         return result.insertId;
     }
@@ -16,11 +16,11 @@ class Practitioner {
             return rows;
     }
     static async search(search) {
-        let query = 'SELECT * FROM practitioners WHERE 1=1';
+        let query = 'SELECT * FROM practitioner WHERE 1=1';
         const params = [];
 
         if (search.cr_id) {
-            query += ' AND cr_id LIKE ?';
+            query += ' AND pu_id LIKE ?';
             params.push(`%${search.cr_id}%`);
         }
         
@@ -36,6 +36,10 @@ class Practitioner {
     static async delete(id){
         const [result] = await pool.query(`DELETE FROM practitioner WHERE id = ?`, [id]);
         return result.affectedRows;
+    }
+    static async getPractitionerByPuID(pu_id){
+        const [rows] = await pool.query(`SELECT * FROM practitioner WHERE pu_id = ?`, [pu_id]);
+        return rows[0]
     }
 }
 

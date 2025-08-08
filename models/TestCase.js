@@ -2,9 +2,9 @@ const pool = require("../config/db");
 
 class TestCase {
     static async create(testcase){
-        const {name, description, test_config} = testcase;
+        const {intervention_id, name, description, test_config, code} = testcase;
         const [result] = await pool.query(
-            'INSERT INTO testcase(name, description, test_config) VALUES(?,?,?)', [name, description, test_config]
+            'INSERT INTO testcase(name, description, test_config, code) VALUES(?,?,?,?,?)', [intervention_id, name, description, test_config, code]
         );
         return result.insertId;
     }
@@ -16,7 +16,7 @@ class TestCase {
             return rows;
     }
     static async search(search) {
-        let query = 'SELECT * FROM testcases WHERE 1=1';
+        let query = 'SELECT * FROM testcase WHERE 1=1';
         const params = [];
 
         if (search.cr_id) {

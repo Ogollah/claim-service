@@ -1,5 +1,4 @@
 const pool = require('./db');
-const bcrypt = require('bcryptjs');
 
 async function initializeDatabase() {
   try {
@@ -13,6 +12,7 @@ async function initializeDatabase() {
         birthdate VARCHAR(255) NOT NULL,
         national_id VARCHAR(255),
         email VARCHAR(255),
+        system_value VARCHAR(255),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -24,7 +24,7 @@ async function initializeDatabase() {
         name VARCHAR(255) NOT NULL UNIQUE,
         level VARCHAR(255) NOT NULL,
         slade_code VARCHAR(255),
-        status INT
+        status INT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -40,36 +40,43 @@ async function initializeDatabase() {
         national_id VARCHAR(255),
         status INT,
         name VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-        await pool.query(`
-        CREATE TABLE IF NOT EXISTS package (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        code VARCHAR(255) NOT NULL,
-        phone VARCHAR(255),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-        await pool.query(`
-        CREATE TABLE IF NOT EXISTS intervention (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        code VARCHAR(255) NOT NULL,
-        name VARCHAR(255),
+        slade_code VARCHAR(255),
+        reg_number VARCHAR(255),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
     await pool.query(`
+      CREATE TABLE IF NOT EXISTS package (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        code VARCHAR(255) NOT NULL UNIQUE,
+        name VARCHAR(255),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS intervention (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        package_id INT NOT NULL,
+        code VARCHAR(255) NOT NULL UNIQUE,
+        name VARCHAR(255),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (package_id) REFERENCES package(id) ON DELETE CASCADE
+      );
+    `);
+
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS testcase (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      description TEXT,
-      test_config JSON NOT NULL,  -- This is the JSON column
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-  )
-`);
-    
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        intervention_id INT NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        description TEXT,
+        test_config JSON NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (intervention_id) REFERENCES intervention(id) ON DELETE CASCADE
+      );
+    `);    
     console.log('Database initialization completed successfully');
   } catch (error) {
     console.error('Error initializing database:', error);

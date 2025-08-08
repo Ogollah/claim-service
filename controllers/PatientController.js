@@ -4,9 +4,9 @@ const pool = require('../config/db');
 const patientController = {
     createPatient: async(req, res) => {
         try{
-            const {cd_id, name, gender, birthdate, national_id, email} = req.body;
+            const {cr_id, name, gender, birthdate, national_id, email, system_value} = req.body;
             const patient = await Patient.create({
-                cd_id, name, gender, birthdate, national_id, email
+                cr_id, name, gender, birthdate, national_id, email, system_value
             });
             res.status(201).json({message: 'Patient created successfully', patient});
         } catch (error) {
@@ -47,7 +47,21 @@ const patientController = {
             console.error(error);
             res.status(500).json({message: 'Server error'});
         }
+    },
+
+    getPatientByCrID: async (req, res) => {
+        try {
+            const { cr_id } = req.params;
+            console.log('this is cr id', cr_id);
+
+            const patient = await Patient.getByCrID(cr_id);
+            res.json(patient);
+        } catch (error) {
+            console.error('Error getting patient', error);
+            res.status(500).json({ message: 'Server error' });
+        }
     }
+
 
 }
 

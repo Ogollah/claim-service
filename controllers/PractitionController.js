@@ -4,9 +4,9 @@ const pool = require('../config/db');
 const practitionerController = {
     createPractitioner: async(req, res) => {
         try{
-            const {pu_id, name, gender, phone, address, national_id, email, status} = req.body;
+            const {pu_id, name, gender, phone, address, national_id, email, status, slade_code, reg_number} = req.body;
             const practitioner = await Practitioner.create({
-                pu_id, name, gender, phone, address, national_id, email, status
+                pu_id, name, gender, phone, address, national_id, email, status, slade_code, reg_number
             });
             res.status(201).json({message: 'Practitioner created successfully', practitioner});
         } catch (error) {
@@ -47,8 +47,18 @@ const practitionerController = {
             console.error(error);
             res.status(500).json({message: 'Server error'});
         }
+    },
+    getPractitionerByPuID: async(req, res) => {
+        try {
+            const { pu_id } = req.params;
+            const practitioner = await Practitioner.getPractitionerByPuID(pu_id);
+            res.json(practitioner);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({message: 'Server error'});
+            
+        }
     }
-
 }
 
 module.exports = practitionerController;

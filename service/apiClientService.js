@@ -5,7 +5,7 @@ class ApiClientService {
   constructor() {
     this.client = axios.create({
       baseURL: process.env.API_BASE_URL || 'https://qa-payers.apeiro-digital.com/api/v1/',
-      timeout: 10000,
+      timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
         'apikey': process.env.API_KEY
