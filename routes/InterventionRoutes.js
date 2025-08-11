@@ -7,4 +7,5 @@ router.get('/', interventionController.getAllInterventions);
 router.get('/intervention/:query', interventionController.searchIntervention);
 router.delete('/delete/:id', interventionController.deleteIntervention);
 router.get('/:package_id', interventionController.getInterventionByPackageId);
+router.get('/code/:code', interventionController.getInterventionByCode);
 module.exports = router;

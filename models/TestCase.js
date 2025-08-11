@@ -2,9 +2,11 @@ const pool = require("../config/db");
 
 class TestCase {
     static async create(testcase){
-        const {intervention_id, name, description, test_config, code} = testcase;
+        const {intervention_id, name, description, code, test_config} = testcase;
+        console.log(testcase);
+        
         const [result] = await pool.query(
-            'INSERT INTO testcase(name, description, test_config, code) VALUES(?,?,?,?,?)', [intervention_id, name, description, test_config, code]
+            'INSERT INTO testcase(intervention_id, name, description, code, test_config) VALUES(?,?,?,?,?)', [intervention_id, name, description, code, JSON.stringify(test_config)]
         );
         return result.insertId;
     }
@@ -36,6 +38,10 @@ class TestCase {
     static async delete(id){
         const [result] = await pool.query(`DELETE FROM testcase WHERE id = ?`, [id]);
         return result.affectedRows;
+    }
+    static async getTestCaseByCode(code) {
+        const [result] = await pool.query(`SELECT * FROM testcase WHERE code = ?`, [code]);
+        return result;
     }
 }
 

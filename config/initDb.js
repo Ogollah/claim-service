@@ -69,9 +69,10 @@ async function initializeDatabase() {
       CREATE TABLE IF NOT EXISTS testcase (
         id INT AUTO_INCREMENT PRIMARY KEY,
         intervention_id INT NOT NULL,
-        name VARCHAR(255) NOT NULL,
+        name VARCHAR(255) NOT NULL UNIQUE,
         description TEXT,
         test_config JSON NOT NULL,
+        code VARCHAR(255) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (intervention_id) REFERENCES intervention(id) ON DELETE CASCADE

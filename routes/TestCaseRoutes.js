@@ -6,4 +6,5 @@ router.post('/', testCaseController.createTestCase);
 router.get('/', testCaseController.getAllTestCases);
 router.get('/test-case/:query', testCaseController.searchTestCase);
 router.delete('/delete/:id', testCaseController.deleteTestCase);
+router.get('/:code', testCaseController.getTestCaseByCode);
 module.exports = router

@@ -57,6 +57,16 @@ const interventionController = {
             console.error(error);
             res.status(500).json({message: 'Server error'});
         }
+    },
+    getInterventionByCode: async(req, res) => {
+        try {
+            const { code } = req.params;
+            const intervention = await Intervention.getInterventionByCode(code);
+            res.json(intervention);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({message: 'Server error'});
+        }
     }
 }
 

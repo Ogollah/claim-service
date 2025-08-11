@@ -41,6 +41,11 @@ class Intervention {
         const [res] = await pool.query(`SELECT * FROM intervention WHERE package_id = ?`, [package_id]);
         return res;
     }
+
+    static async getInterventionByCode(code){
+        const [res] = await pool.query(`SELECT * FROM intervention WHERE code = ?`, [code]);
+        return res;
+    }
 }
 
 module.exports = Intervention;

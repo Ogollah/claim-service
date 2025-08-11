@@ -4,14 +4,14 @@ const pool = require('../config/db');
 const testCaseController = {
     createTestCase: async(req, res) => {
         try{
-            const {intervention_id, name, description, test_config} = req.body;
+            const {intervention_id, name, description, code, test_config} = req.body;
             const testCase = await TestCase.create({
-               intervention_id, name, description, test_config
+               intervention_id, name, description, code, test_config
             });
             res.status(201).json({message: 'Test case created successfully', testCase});
         } catch (error) {
             console.error(error);
-            res.status(500).json({message: 'Server error'});
+            res.json({message: 'Server error', error});
         }
     },
 
@@ -44,6 +44,17 @@ const testCaseController = {
         try {
             await TestCase.delete(req.params.id);
             res.json({message: 'Test case deleted successfuly'});
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({message: 'Server error'});
+        }
+    },
+
+    getTestCaseByCode: async(req, res) => {
+        try {
+            const { code } = req.params;
+            const resp = await TestCase.getTestCaseByCode(code);
+            res.json(resp)
         } catch (error) {
             console.error(error);
             res.status(500).json({message: 'Server error'});
