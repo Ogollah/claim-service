@@ -43,6 +43,13 @@ class TestCase {
         const [result] = await pool.query(`SELECT * FROM testcase WHERE code = ?`, [code]);
         return result;
     }
+    static async updateTestConfig(id, newTestConfig) {
+        const [result] = await pool.query(
+            'UPDATE testcase SET test_config = ? WHERE id = ?',
+            [JSON.stringify(newTestConfig), id]
+        );
+        return result.affectedRows;
+    }
 }
 
 module.exports = TestCase;

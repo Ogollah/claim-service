@@ -1,5 +1,4 @@
 const Provider = require('../models/Provider');
-const pool = require('../config/db');
 
 const providerController = {
     createProvider: async(req, res) => {

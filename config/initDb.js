@@ -77,7 +77,23 @@ async function initializeDatabase() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (intervention_id) REFERENCES intervention(id) ON DELETE CASCADE
       );
-    `);    
+    `);  
+    
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS result (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        testcase_id INT NOT NULL,
+        result_status INT NOT NULL,
+        claim_id VARCHAR(255),
+        response_id VARCHAR(255),
+        status_code VARCHAR(255),
+        message TEXT,
+        detail TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (testcase_id) REFERENCES testcase(id) ON DELETE CASCADE
+      );  
+    `);
     console.log('Database initialization completed successfully');
   } catch (error) {
     console.error('Error initializing database:', error);

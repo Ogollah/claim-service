@@ -9,6 +9,7 @@ const ProviderRoutes = require('./routes/ProviderRoutes');
 const PackageRoutes = require('./routes/PackageRoutes');
 const InterventionRoutes = require('./routes/InterventionRoutes');
 const TestCaseRoutes = require('./routes/TestCaseRoutes');
+const ResultRoutes = require('./routes/ResultRoutes');
 const logger = require('./utils/logger');
 
 const app = express();
@@ -29,6 +30,7 @@ app.use('/api/providers', ProviderRoutes);
 app.use('/api/packages', PackageRoutes);
 app.use('/api/interventions', InterventionRoutes);
 app.use('/api/test-cases', TestCaseRoutes);
+app.use('/api/results', ResultRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

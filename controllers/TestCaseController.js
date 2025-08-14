@@ -59,7 +59,26 @@ const testCaseController = {
             console.error(error);
             res.status(500).json({message: 'Server error'});
         }
+    },
+
+    updateTestConfig: async (req, res) => {
+    try {
+        const id = req.params.id;
+        const testCase = req.body?.result_status?.test_config;
+
+        if (!id || !testCase) {
+        return res.status(400).json({ error: 'Missing test case ID or test_config data.' });
+        }
+
+        const resp = await TestCase.updateTestConfig(id, testCase);
+
+        return res.status(200).json(resp);
+    } catch (error) {
+        console.error('Error updating test config:', error);
+        return res.status(500).json({ error: 'Internal server error.' });
     }
+    }
+
 
 }
 

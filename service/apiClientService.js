@@ -22,14 +22,13 @@ class ApiClientService {
   async submitClaimBundle(fhirBundle, apiKey) {
     try {
       const response = await this.client.post('claim/bundle', fhirBundle, {
-        headers: {
-          'apikey': `${apiKey}`
-        }
+        headers: { apikey: apiKey }
       });
 
       logger.info('Claim bundle submitted successfully', {
         status: response.status,
-        claimId: fhirBundle.id
+        claimId: fhirBundle.id,
+        endpoint: 'claim/bundle'
       });
 
       return {
@@ -38,14 +37,66 @@ class ApiClientService {
         data: response.data
       };
     } catch (error) {
+      const errorStatus = error.response?.status || 500;
+      const errorData = error.response?.data || { message: error.message };
+
       logger.error('Failed to submit claim bundle', {
-        error: error.message,
-        claimId: fhirBundle.id
+        status: errorStatus,
+        error: errorData,
+        claimId: fhirBundle.id,
+        endpoint: 'claim/bundle'
       });
+
       return {
         success: false,
-        status: error.response?.status || 500,
-        error: error.response?.data || error.message
+        status: errorStatus,
+        error: errorData
+      };
+    }
+  }
+
+  /**
+   * Retrieves claim response for a given claim ID
+   * @param {string} claimId - The claim ID to lookup
+   * @param {string} apiKey - API key for authentication
+   * @returns {Promise<Object>} API response
+   */
+  async getClaimResponse(claimId, apiKey) {
+    if (!claimId) {
+      logger.error('Missing claimId parameter');
+      throw new Error('claimId is required');
+    }
+
+    try {
+      const response = await this.client.get(
+        `insurance-claim/internal/claimObject?claimId=${claimId}`,
+        { headers: { apikey: apiKey } }
+      );
+
+      logger.info('Successfully retrieved claim response', {
+        claimId,
+        status: response.status
+      });
+
+      return {
+        success: true,
+        status: response.status,
+        data: response.data
+      };
+    } catch (error) {
+      const errorStatus = error.response?.status || 500;
+      const errorData = error.response?.data || { message: error.message };
+
+      logger.error('Failed to retrieve claim response', {
+        claimId,
+        status: errorStatus,
+        error: errorData
+      });
+
+      return {
+        success: false,
+        status: errorStatus,
+        error: errorData
       };
     }
   }
