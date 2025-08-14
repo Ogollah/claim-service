@@ -67,6 +67,7 @@ class ClaimController {
       }
 
       const fhirBundle = buildFhirClaimBundle.transformFormToFhirBundle(formData, preAuthResponseId);
+      
       const result = await apiClientService.submitClaimBundle(fhirBundle, this.apiKey);
 
       return res.status(result.success ? 200 : result.status || 400).json({

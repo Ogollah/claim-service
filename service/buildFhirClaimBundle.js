@@ -36,7 +36,7 @@ class FhirClaimBundleService {
     transformedPayload.entry.push(this._createCoverageEntry(formData.patient));
     transformedPayload.entry.push(this._createOrganizationEntry(formData.provider));
     transformedPayload.entry.push(this._createPatientEntry(formData.patient));
-    transformedPayload.entry.push(this._createClaimEntry(formData));
+    transformedPayload.entry.push(this._createClaimEntry(formData, preAuthResponseId));
     const payload = JSON.parse(JSON.stringify(transformedPayload));
     console.info('Transformed FHIR Bundle:', JSON.stringify(payload, null, 2));
     
