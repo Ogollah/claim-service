@@ -12,7 +12,7 @@ class FhirClaimBundleService {
     if (formData.use?.id === 'preauthorization' && !preAuthResponseId) {
       return 'preauthorization';
     }
-    if (preAuthResponseId || formData.use?.id === 'claim') {
+    if (preAuthResponseId || formData.use === 'claim') {
       return 'claim';
     }
     return undefined;
@@ -264,7 +264,7 @@ class FhirClaimBundleService {
           coding: [
             {
               system: "http://terminology.hl7.org/CodeSystem/ex-claimsubtype",
-              code: "ip"
+              code: formData.claimSubType
             }
           ]
         },
