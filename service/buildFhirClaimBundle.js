@@ -9,16 +9,20 @@ const {
 class FhirClaimBundleService {
 
   _getClaimUseType(formData, preAuthResponseId) {
-    if (formData.use?.id === 'preauthorization' && !preAuthResponseId) {
+    if (formData.use === 'preauthorization' && !preAuthResponseId) {
+      console.log("preauth id", preAuthResponseId);
       return 'preauthorization';
     }
     if (preAuthResponseId || formData.use === 'claim') {
+      console.log("preauth id", preAuthResponseId);
       return 'claim';
     }
     return undefined;
   }
 
   transformFormToFhirBundle(formData, preAuthResponseId = null) {
+    console.log("preauth id", preAuthResponseId);
+    
     // Create the base payload
     const transformedPayload = {
       meta: {
