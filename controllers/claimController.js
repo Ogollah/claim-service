@@ -41,7 +41,7 @@ class ClaimController {
         });
       }
 
-      const isPreauth = formData.use === 'preauthorization';
+      const isPreauth = formData.use === 'preauth-claim';
       let preAuthResponseId = null;
 
       if (isPreauth) {

@@ -10,11 +10,9 @@ class FhirClaimBundleService {
 
   _getClaimUseType(formData, preAuthResponseId) {
     if (formData.use === 'preauthorization' && !preAuthResponseId) {
-      console.log("preauth id", preAuthResponseId);
       return 'preauthorization';
     }
-    if (preAuthResponseId || formData.use === 'claim') {
-      console.log("preauth id", preAuthResponseId);
+    if (preAuthResponseId || formData.use === 'claim' || formData.use === "related") {
       return 'claim';
     }
     return undefined;
@@ -293,7 +291,7 @@ class FhirClaimBundleService {
             }
           }
         ],
-        related: preAuthResponseId ? this._createRelatedPreAuthEntry(preAuthResponseId) : [],
+        related: preAuthResponseId ? this._createRelatedPreAuthEntry(formData.relatedClaimId) : [],
         extension: [
           {
             extension: [
