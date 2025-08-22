@@ -19,7 +19,10 @@ class FhirClaimBundleService {
   }
 
   transformFormToFhirBundle(formData, preAuthResponseId = null) {
-    console.log("preauth id", preAuthResponseId);
+    const relatedId = formData?.relatedClaimId;
+    const response = preAuthResponseId;
+    const resp = relatedId || response || null;
+    console.log("preauth id", resp);
     
     // Create the base payload
     const transformedPayload = {
@@ -38,7 +41,7 @@ class FhirClaimBundleService {
     transformedPayload.entry.push(this._createCoverageEntry(formData.patient));
     transformedPayload.entry.push(this._createOrganizationEntry(formData.provider));
     transformedPayload.entry.push(this._createPatientEntry(formData.patient));
-    transformedPayload.entry.push(this._createClaimEntry(formData, preAuthResponseId));
+    transformedPayload.entry.push(this._createClaimEntry(formData, resp, response));
     const payload = JSON.parse(JSON.stringify(transformedPayload));
     console.info('Transformed FHIR Bundle:', JSON.stringify(payload, null, 2));
     
@@ -171,7 +174,7 @@ class FhirClaimBundleService {
     };
   }
 
-  _createClaimEntry(formData, preAuthResponseId) {
+  _createClaimEntry(formData, preAuthResponseId, response) {
     const today = new Date();
     const formatted = today.toISOString().split('T')[0];
 
@@ -261,7 +264,7 @@ class FhirClaimBundleService {
           ]
         },
         total: {
-          value: Number(preAuthResponseId ? formData.claim_amount : formData.total.value),
+          value: Number(response ? formData.claim_amount : formData.total.value),
           currency: "KES"
         },
         resourceType: "Claim",
@@ -277,8 +280,8 @@ class FhirClaimBundleService {
           reference: `${FHIR_SERVER.BASE_URL}/Patient/${formData.patient.id}`
         },
         billablePeriod: {
-          start: preAuthResponseId? `${formatted}T10:40:22+03:00` : `${formData.billablePeriod.billableStart}T10:40:22+03:00`,
-          end: preAuthResponseId? `${formatted}T10:40:22+03:00` : `${formData.billablePeriod.billableEnd}T12:00:47+03:00`
+          start: response ? `${formatted}T10:40:22+03:00` : `${formData.billablePeriod.billableStart}T10:40:22+03:00`,
+          end: response ? `${formatted}T10:40:22+03:00` : `${formData.billablePeriod.billableEnd}T12:00:47+03:00`
         },
         diagnosis: [
           {
@@ -309,14 +312,14 @@ class FhirClaimBundleService {
               {
                 url: "invoiceAmount",
                 valueMoney: {
-                  value: Number(preAuthResponseId ? formData.claim_amount : formData.total.value),
+                  value: Number(response ? formData.claim_amount : formData.total.value),
                   currency: "KES"
                 }
               },
               {
                 url: `${FHIR_SERVER.BASE_URL}/StructureDefinition/extension-patient-share`,
                 valueMoney: {
-                  value: Number(preAuthResponseId ? formData.claim_amount : formData.total?.value),
+                  value: Number(response ? formData.claim_amount : formData.total?.value),
                   currency: "KES"
                 }
               },
@@ -358,19 +361,19 @@ class FhirClaimBundleService {
             ]
           },
           servicedPeriod: {
-            start: preAuthResponseId ? formatted : item.servicePeriod?.start,
-            end: preAuthResponseId ? formatted : item.servicePeriod?.end
+            start: response ? formatted : item.servicePeriod?.start,
+            end: response ? formatted : item.servicePeriod?.end
           },
           quantity: {
             value: Number(item.quantity?.value)
           },
           unitPrice: {
-            value: Number(preAuthResponseId ? formData.claim_amount : item.unitPrice?.value),
+            value: Number(response ? formData.claim_amount : item.unitPrice?.value),
             currency: "KES"
           },
           factor: 1,
           net: {
-            value: Number(preAuthResponseId ? formData.claim_amount : item.net?.value),
+            value: Number(response ? formData.claim_amount : item.net?.value),
             currency: "KES"
           }
         }))
