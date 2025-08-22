@@ -1,6 +1,8 @@
 // FHIR Server Constants
 const FHIR_SERVER = {
   BASE_URL: 'https://qa-mis.apeiro-digital.com/fhir',
+  TERMINOLOGY_URL: 'http://terminology.hl7.org',
+  PROVIDER_URL: 'https://api-edi.provider.sha.go.ke',
   PATHS: {
     PATIENT: 'Patient',
     ORGANIZATION: 'Organization',

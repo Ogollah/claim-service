@@ -69,7 +69,7 @@ class FhirClaimBundleService {
         ],
         status: "active",
         beneficiary: {
-          reference: `https://qa-mis.apeiro-digital.com/fhir/Patient/${patientData.id}`,
+          reference: `${FHIR_SERVER.BASE_URL}/Patient/${patientData.id}`,
           type: "Patient"
         },
         resourceType: "Coverage"
@@ -79,12 +79,12 @@ class FhirClaimBundleService {
 
   _createOrganizationEntry(providerData) {
     return {
-      fullUrl: `https://qa-mis.apeiro-digital.com/fhir/Organization/${providerData.id}`,
+      fullUrl: `${FHIR_SERVER.BASE_URL}/Organization/${providerData.id}`,
       resource: {
         identifier: [
           {
             use: 'official',
-            system: 'https://qa-mis.apeiro-digital.com/fhir/license/provider-license',
+            system: `${FHIR_SERVER.BASE_URL}/license/provider-license`,
             value: "PR-FHIR"
           }
         ],
@@ -93,7 +93,7 @@ class FhirClaimBundleService {
           {
             coding: [
               {
-                system: "https://qa-mis.apeiro-digital.com/fhir/terminology/CodeSystem/organization-type",
+                system: `${FHIR_SERVER.BASE_URL}/terminology/CodeSystem/organization-type`,
                 code: "prov",
               }
             ]
@@ -103,17 +103,17 @@ class FhirClaimBundleService {
         id: providerData.id,
         meta: {
           profile: [
-            "https://qa-mis.apeiro-digital.com/fhir/StructureDefinition/provider-organization|1.0.0"
+            `${FHIR_SERVER.BASE_URL}/StructureDefinition/provider-organization|1.0.0`
           ]
         },
         name: providerData.name,
         extension: [
           {
-            url: "https://qa-mis.apeiro-digital.com/fhir/StructureDefinition/facility-level",
+            url: `${FHIR_SERVER.BASE_URL}/StructureDefinition/facility-level`,
             valueCodeableConcept: {
               coding: [
                 {
-                  system: "https://qa-mis.apeiro-digital.com/fhir/StructureDefinition/facility-level",
+                  system: `${FHIR_SERVER.BASE_URL}/StructureDefinition/facility-level`,
                   code: providerData.level,
                   display: providerData.level
                 }
@@ -127,7 +127,7 @@ class FhirClaimBundleService {
 
   _createPatientEntry(patientData) {
     return {
-      fullUrl: `https://qa-mis.apeiro-digital.com/fhir/Patient/${patientData.id}`,
+      fullUrl: `${FHIR_SERVER.BASE_URL}/Patient/${patientData.id}`,
       resource: {
         gender: patientData.gender,
         birthDate: patientData.birthDate,
@@ -135,28 +135,28 @@ class FhirClaimBundleService {
         id: patientData.id,
         meta: {
           profile: [
-            "https://qa-mis.apeiro-digital.com/fhir/StructureDefinition/patient|1.0.0"
+            `${FHIR_SERVER.BASE_URL}/StructureDefinition/patient|1.0.0`
           ]
         },
         identifier: [
           {
             use: 'official',
-            system: 'https://qa-mis.apeiro-digital.com/fhir/identifier/shanumber',
+            system: `${FHIR_SERVER.BASE_URL}/identifier/shanumber`,
             value: patientData.id
           },
           {
             value: patientData.identifiers.find(i => i.system === 'NationalID')?.value,
             use: 'official',
-            system: 'https://qa-mis.apeiro-digital.com/fhir/identifier/phonenumber'
+            system: `${FHIR_SERVER.BASE_URL}/identifier/phonenumber`
           },
           {
             value: patientData.identifiers.find(i => i.system === 'NationalID')?.value,
             use: 'official',
-            system: 'https://qa-mis.apeiro-digital.com/fhir/identifier/nationalid'
+            system: `${FHIR_SERVER.BASE_URL}/identifier/nationalid`
           },
           {
             use: 'official',
-            system: 'https://qa-mis.apeiro-digital.com/fhir/identifier/other',
+            system: `${FHIR_SERVER.BASE_URL}/identifier/other`,
             value: patientData.identifiers.find(i => i.system === 'NationalID')?.value
           }
         ],
@@ -172,12 +172,15 @@ class FhirClaimBundleService {
   }
 
   _createClaimEntry(formData, preAuthResponseId) {
+    const today = new Date();
+    const formatted = today.toISOString().split('T')[0];
+
     return {
-      fullUrl: `https://qa-mis.apeiro-digital.com/fhir/Claim/${uuidv4()}`,
+      fullUrl: `${FHIR_SERVER.BASE_URL}/Claim/${uuidv4()}`,
       resource: {
         created: formData.billablePeriod.created,
         provider: {
-          reference: `https://qa-mis.apeiro-digital.com/fhir/Organization/${formData.provider.id}`
+          reference: `${FHIR_SERVER.BASE_URL}/Organization/${formData.provider.id}`
         },
         supportingInfo: [
           {
@@ -185,7 +188,7 @@ class FhirClaimBundleService {
             category: {
               coding: [
                 {
-                  system: "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+                  system: `${FHIR_SERVER.TERMINOLOGY_URL}/CodeSystem/claiminformationcategory`,
                   code: "attachment",
                   display: "Attachment"
                 }
@@ -193,7 +196,7 @@ class FhirClaimBundleService {
             },
             valueAttachment: {
               language: "en",
-              url: "https://api-edi.provider.sha.go.ke/media/edi/default.pdf",
+              url: `${FHIR_SERVER.PROVIDER_URL}/media/edi/default.pdf`,
               size: "15765",
               title: "Claim Attachment.pdf",
               contentType: "application/pdf",
@@ -202,13 +205,13 @@ class FhirClaimBundleService {
                   valueCodeableConcept: {
                     coding: [
                       {
-                        system: "https://qa-mis.apeiro-digital.com/fhir/CodeSystem/attachment-type",
+                        system: `${FHIR_SERVER.BASE_URL}/CodeSystem/attachment-type`,
                         code: "discharge-summary",
                         display: "Discharge Summary"
                       }
                     ]
                   },
-                  url: "https://qa-mis.apeiro-digital.com/fhir/CodeSystem/attachment-type"
+                  url: `${FHIR_SERVER.BASE_URL}/CodeSystem/attachment-type`
                 }
               ]
             }
@@ -218,25 +221,25 @@ class FhirClaimBundleService {
             category: {
               coding: [
                 {
-                  system: "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+                  system: `${FHIR_SERVER.TERMINOLOGY_URL}/CodeSystem/claiminformationcategory`,
                   code: "attachment",
                   display: "Attachment"
                 }
               ]
             },
             valueAttachment: {
-              url: "https://api-edi.provider.sha.go.ke/media/edi/default.pdf",
+              url: `${FHIR_SERVER.PROVIDER_URL}/media/edi/default.pdf`,
               size: "15765",
               title: "Lab Results.pdf",
               contentType: "application/pdf",
               language: "en",
               extension: [
                 {
-                  url: "https://qa-mis.apeiro-digital.com/fhir/CodeSystem/attachment-type",
+                  url: `${FHIR_SERVER.BASE_URL}/CodeSystem/attachment-type`,
                   valueCodeableConcept: {
                     coding: [
                       {
-                        system: "https://qa-mis.apeiro-digital.com/fhir/CodeSystem/attachment-type",
+                        system: `${FHIR_SERVER.BASE_URL}/CodeSystem/attachment-type`,
                         code: "other",
                         display: "Other"
                       }
@@ -252,30 +255,30 @@ class FhirClaimBundleService {
         priority: {
           coding: [
             {
-              system: "http://terminology.hl7.org/CodeSystem/processpriority",
+              system: `${FHIR_SERVER.TERMINOLOGY_URL}/CodeSystem/processpriority`,
               code: "normal"
             }
           ]
         },
         total: {
-          value: Number(formData.total.value),
+          value: Number(preAuthResponseId ? formData.claim_amount : formData.total.value),
           currency: "KES"
         },
         resourceType: "Claim",
         subType: {
           coding: [
             {
-              system: "http://terminology.hl7.org/CodeSystem/ex-claimsubtype",
+              system: `${FHIR_SERVER.TERMINOLOGY_URL}/CodeSystem/ex-claimsubtype`,
               code: formData.claimSubType
             }
           ]
         },
         patient: {
-          reference: `https://qa-mis.apeiro-digital.com/fhir/Patient/${formData.patient.id}`
+          reference: `${FHIR_SERVER.BASE_URL}/Patient/${formData.patient.id}`
         },
         billablePeriod: {
-          start: `${formData.billablePeriod.billableStart}T10:40:22+03:00`,
-          end: `${formData.billablePeriod.billableEnd}T12:00:47+03:00`
+          start: preAuthResponseId? `${formatted}T10:40:22+03:00` : `${formData.billablePeriod.billableStart}T10:40:22+03:00`,
+          end: preAuthResponseId? `${formatted}T10:40:22+03:00` : `${formData.billablePeriod.billableEnd}T12:00:47+03:00`
         },
         diagnosis: [
           {
@@ -283,7 +286,7 @@ class FhirClaimBundleService {
             diagnosisCodeableConcept: {
               coding: [
                 {
-                  system: "https://qa-mis.apeiro-digital.com/fhir/terminology/CodeSystem/icd-10",
+                  system: `${FHIR_SERVER.BASE_URL}/terminology/CodeSystem/icd-10`,
                   code: "BC00",
                   display: "Multiple valve disease"
                 }
@@ -306,38 +309,38 @@ class FhirClaimBundleService {
               {
                 url: "invoiceAmount",
                 valueMoney: {
-                  value: Number(formData.total.value),
+                  value: Number(preAuthResponseId ? formData.claim_amount : formData.total.value),
                   currency: "KES"
                 }
               },
               {
-                url: "https://qa-mis.apeiro-digital.com/fhir/StructureDefinition/extension-patient-share",
+                url: `${FHIR_SERVER.BASE_URL}/StructureDefinition/extension-patient-share`,
                 valueMoney: {
-                  value: Number(formData.total?.value),
+                  value: Number(preAuthResponseId ? formData.claim_amount : formData.total?.value),
                   currency: "KES"
                 }
               },
               {
-                url: "https://qa-mis.apeiro-digital.com/fhir/StructureDefinition/extension-patientInvoiceIdentifier",
+                url: `${FHIR_SERVER.BASE_URL}/StructureDefinition/extension-patientInvoiceIdentifier`,
                 valueIdentifier: {
-                  system: "https://qa-mis.apeiro-digital.com/fhir/identifier/patientInvoice",
+                  system: `${FHIR_SERVER.BASE_URL}/identifier/patientInvoice`,
                   value: `${formData.patient.id}-invoice-${uuidv4()}`
                 }
               }
             ],
-            url: "https://qa-mis.apeiro-digital.com/fhir/StructureDefinition/extension-patientInvoice"
+            url: `${FHIR_SERVER.BASE_URL}/StructureDefinition/extension-patientInvoice`
           }
         ],
         identifier: [
           {
-            system: 'https://qa-mis.apeiro-digital.com/fhir/claim',
+            system: `${FHIR_SERVER.BASE_URL}/claim`,
             value: uuidv4()
           }
         ],
         type: {
           coding: [
             {
-              system: "http://terminology.hl7.org/CodeSystem/claim-type",
+              system: `${FHIR_SERVER.TERMINOLOGY_URL}/CodeSystem/claim-type`,
               code: "institutional"
             }
           ]
@@ -350,24 +353,24 @@ class FhirClaimBundleService {
               {
                 code: item.code,
                 display: item.display,
-                system: "https://qa-mis.apeiro-digital.com/fhir/CodeSystem/intervention-codes"
+                system: `${FHIR_SERVER.BASE_URL}/CodeSystem/intervention-codes`
               }
             ]
           },
           servicedPeriod: {
-            start: item.servicePeriod?.start,
-            end: item.servicePeriod?.end
+            start: preAuthResponseId ? formatted : item.servicePeriod?.start,
+            end: preAuthResponseId ? formatted : item.servicePeriod?.end
           },
           quantity: {
             value: Number(item.quantity?.value)
           },
           unitPrice: {
-            value: Number(item.unitPrice?.value),
+            value: Number(preAuthResponseId ? formData.claim_amount : item.unitPrice?.value),
             currency: "KES"
           },
           factor: 1,
           net: {
-            value: Number(item.net?.value),
+            value: Number(preAuthResponseId ? formData.claim_amount : item.net?.value),
             currency: "KES"
           }
         }))
@@ -380,14 +383,14 @@ class FhirClaimBundleService {
               {
             claim: {
                 identifier: {
-                    system: "https://fhir.sha.go.ke/fhir/claim",
+                    system: `${FHIR_SERVER.BASE_URL}/claim`,
                     value: preAuthResponseId
                 }
             },
             relationship: {
                 coding: [
                     {
-                        system: "https://fhir.sha.go.ke/fhir/CodeSystem/claim-relation-type",
+                        system: `${FHIR_SERVER.BASE_URL}/CodeSystem/claim-relation-type`,
                         code: "pre-auth"
                     }
                 ],
