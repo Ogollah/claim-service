@@ -43,6 +43,14 @@ class Patient {
         const [res] = await pool.query('SELECT * FROM patient WHERE cr_id = ?', [crId]);
         return res[0];
     }
+    static async update(id, patient) {
+        const { cr_id, name, gender, birthdate, national_id, email, system_value } = patient;
+        const [result] = await pool.query(
+            'UPDATE patient SET cr_id = ?, name = ?, gender = ?, birthdate = ?, national_id = ?, email = ?, system_value = ? WHERE id = ?',
+            [cr_id, name, gender, birthdate, national_id, email, system_value, id]
+        );
+        return result.affectedRows;
+    }
 }
 
 module.exports = Patient

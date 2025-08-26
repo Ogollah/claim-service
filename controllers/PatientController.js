@@ -60,8 +60,23 @@ const patientController = {
             console.error('Error getting patient', error);
             res.status(500).json({ message: 'Server error' });
         }
-    }
+    },
+    updatePatient: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const patientData = req.body;
 
+            const updatedRows = await Patient.update(id, patientData);
+            if (updatedRows === 0) {
+                return res.status(404).json({ message: 'Patient not found' });
+            }
+
+            res.json({ message: 'Patient updated successfully' });
+        } catch (error) {
+            console.error('Error updating patient', error);
+            res.status(500).json({ message: 'Server error' });
+        }
+    }
 
 }
 
