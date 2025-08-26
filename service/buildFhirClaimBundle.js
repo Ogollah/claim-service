@@ -28,7 +28,7 @@ class FhirClaimBundleService {
     const transformedPayload = {
       meta: {
         profile: [
-          `${FHIR_RESOURCES.STRUCTURED_DEFINATION}/bundle|1.0.0`,
+          `${FHIR_RESOURCES.IDENTIFIER_SYSTEMS.STRUCTURED_DEFINATION}/bundle|1.0.0`,
         ]
       },
       timestamp: new Date().toISOString(),
@@ -264,7 +264,7 @@ class FhirClaimBundleService {
           ]
         },
         total: {
-          value: Number(response ? formData.claim_amount : formData.total.value),
+          value: Number(response ? formData.approvedAmount : formData.total.value),
           currency: "KES"
         },
         resourceType: "Claim",
@@ -297,7 +297,7 @@ class FhirClaimBundleService {
             }
           }
         ],
-        related: preAuthResponseId ? this._createRelatedPreAuthEntry(formData.relatedClaimId) : [],
+        related: preAuthResponseId ? this._createRelatedPreAuthEntry(formData.relatedClaimId || preAuthResponseId) : [],
         extension: [
           {
             extension: [
@@ -312,14 +312,14 @@ class FhirClaimBundleService {
               {
                 url: "invoiceAmount",
                 valueMoney: {
-                  value: Number(response ? formData.claim_amount : formData.total.value),
+                  value: Number(response ? formData.approvedAmount : formData.total.value),
                   currency: "KES"
                 }
               },
               {
                 url: `${FHIR_SERVER.BASE_URL}/StructureDefinition/extension-patient-share`,
                 valueMoney: {
-                  value: Number(response ? formData.claim_amount : formData.total?.value),
+                  value: Number(response ? formData.approvedAmount : formData.total?.value),
                   currency: "KES"
                 }
               },
@@ -368,12 +368,12 @@ class FhirClaimBundleService {
             value: Number(item.quantity?.value)
           },
           unitPrice: {
-            value: Number(response ? formData.claim_amount : item.unitPrice?.value),
+            value: Number(response ? formData.approvedAmount : item.unitPrice?.value),
             currency: "KES"
           },
           factor: 1,
           net: {
-            value: Number(response ? formData.claim_amount : item.net?.value),
+            value: Number(response ? formData.approvedAmount : item.net?.value),
             currency: "KES"
           }
         }))

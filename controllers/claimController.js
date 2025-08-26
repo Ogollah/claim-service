@@ -1,6 +1,9 @@
 require('dotenv').config(); 
 const buildFhirClaimBundle = require('../service/buildFhirClaimBundle');
 const apiClientService = require('../service/apiClientService');
+const {
+  FHIR_SERVER,
+} = require('../utils/constants');
 
 class ClaimController {
   constructor() {
@@ -15,7 +18,7 @@ class ClaimController {
   extractPreAuthResponseId = (responseData) => {
     try {
       return responseData.entry?.find(entry => 
-        entry.resource?.resourceType === 'ClaimResponse'
+        entry.resource?.resourceType === FHIR_SERVER.PATHS.CLAIM
       )?.resource?.id ?? null;
     } catch (error) {
       console.error('Error extracting claim response ID:', error);
@@ -24,12 +27,12 @@ class ClaimController {
   }
 
   /**
-   * Checks if Claim status is approved
+   * Get Claim status
    * @param {Object} claimData - The FHIR Claim resource
-   * @returns {boolean} True if status is approved
+   * @returns {string} state
    */
-  isClaimApproved = (claimData) => {
-    try {
+  getClaimState = (claimData) => {
+        try {
       const claimStateExtension = claimData.extension?.find(ext =>
         ext.url?.endsWith('claim-state-extension')
       );
@@ -38,11 +41,21 @@ class ClaimController {
         coding => coding.system?.endsWith('claim-state')
       )?.code;
 
-      return code === 'approved';
+      return code;
+
     } catch (error) {
       console.error('Error checking claim approval status:', error);
       return false;
     }
+  }
+
+  /**
+   * Checks if Claim status is approved
+   * @param {string} claimData - The FHIR Claim resource
+   * @returns {boolean} True if status is approved
+   */
+  isClaimApproved = (claimData) => {
+      return this.getClaimState(claimData) === 'approved';
   };
 
   /**
@@ -50,44 +63,53 @@ class ClaimController {
    * @param {Object} req - Express request object
    * @param {Object} res - Express response object
    */
-  submitClaim = async (req, res) => {
-    try {
-      const { formData } = req.body;
 
-      if (!formData) {
-        return res.status(400).json({
+submitClaim = async (req, res) => {
+  try {
+    const { formData } = req.body;
+
+    if (!formData) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required parameters: formData'
+      });
+    }
+
+    const isPreauth = formData.use === 'preauth-claim';
+    let preAuthResponseId = null;
+
+    if (isPreauth) {
+      const initialFhirBundle = buildFhirClaimBundle.transformFormToFhirBundle(formData);
+
+      const preAuthResult = await apiClientService.submitClaimBundle(initialFhirBundle, this.apiKey);
+
+      if (!preAuthResult.success) {
+        return res.status(preAuthResult.status || 400).json({
           success: false,
-          message: 'Missing required parameters: formData'
+          message: 'Preauthorization submission failed',
+          error: preAuthResult.error
         });
       }
 
-      const isPreauth = formData.use === 'preauth-claim';
-      let preAuthResponseId = null;
+      preAuthResponseId = this.extractPreAuthResponseId(preAuthResult.data);
 
-      if (isPreauth) {
-        const initialFhirBundle = buildFhirClaimBundle.transformFormToFhirBundle(formData);
+      if (!preAuthResponseId) {
+        return res.status(400).json({
+          success: false,
+          message: 'Could not determine preauthorization response ID'
+        });
+      }
 
-        const preAuthResult = await apiClientService.submitClaimBundle(initialFhirBundle, this.apiKey);
-        
-        if (!preAuthResult.success) {
-          return res.status(preAuthResult.status || 400).json({
-            success: false,
-            message: 'Preauthorization submission failed',
-            error: preAuthResult.error
-          });
-        }
+      const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-        preAuthResponseId = this.extractPreAuthResponseId(preAuthResult.data);
-        
-        if (!preAuthResponseId) {
-          return res.status(400).json({
-            success: false,
-            message: 'Could not determine preauthorization response ID'
-          });
-        }
+      const maxRetries = 3;
+      const delayMs = 20000;
+      let state = 'pending';
+      let claimResponseResult = null;
 
-        const claimResponseResult = await apiClientService.getClaimResponse(preAuthResponseId, this.apiKey);
-        
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        claimResponseResult = await apiClientService.getClaimResponse(preAuthResponseId, this.apiKey);
+
         if (!claimResponseResult.success) {
           return res.status(claimResponseResult.status || 400).json({
             success: false,
@@ -96,46 +118,59 @@ class ClaimController {
           });
         }
 
-        const isApproved = this.isClaimResponseApproved(claimResponseResult.data);
+        state = this.getClaimState(claimResponseResult.data);
 
-        if (!isApproved) {
-          return res.status(400).json({
-            success: false,
-            message: 'Preauthorization not approved',
-            data: claimResponseResult.data,
-            preAuthResponseId
-          });
+        if (state === 'approved') {
+          break;
+        }
+
+        if (attempt < maxRetries) {
+          await delay(delayMs);
         }
       }
 
-      const fhirBundle = buildFhirClaimBundle.transformFormToFhirBundle(formData, preAuthResponseId);
-
-      const result = await apiClientService.submitClaimBundle(fhirBundle, this.apiKey);
-
-      return res.status(result.success ? 200 : result.status || 400).json({
-        success: result.success,
-        message: result.success ? 
-          (isPreauth ? 'Preauthorized claim submitted successfully' : 'Claim submitted successfully') : 
-          'Failed to submit claim',
-        ...(result.success ? {
-          data: result.data,
-          fhirBundle,
-          isPreauth,
+      if (state !== 'approved') {
+        return res.status(400).json({
+          success: false,
+          message: 'Preauthorization not approved, current state: ' + state,
+          data: claimResponseResult.data,
           preAuthResponseId
-        } : {
-          error: result.error
-        })
-      });
-
-    } catch (error) {
-      console.error('Claim submission error:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'Internal server error',
-        error: error.message
-      });
+        });
+      }
     }
+
+    // Continue with final claim submission
+    const fhirBundle = buildFhirClaimBundle.transformFormToFhirBundle(formData, preAuthResponseId);
+
+    const result = await apiClientService.submitClaimBundle(fhirBundle, this.apiKey);
+
+    return res.status(result.success ? 200 : result.status || 400).json({
+      success: result.success,
+      message: result.success ?
+        (isPreauth ? 'Preauthorized claim submitted successfully' : 'Claim submitted successfully') :
+        'Failed to submit claim',
+      ...(result.success ? {
+        data: result,
+        fhirBundle,
+        isPreauth,
+        preAuthResponseId
+      } : {
+        error: { ...result,
+          fhirBundle
+         },
+      })
+    });
+
+  } catch (error) {
+    console.error('Claim submission error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error
+    });
   }
+}
+
 
   getClaimResponse = async (req, res) => {
     try {
