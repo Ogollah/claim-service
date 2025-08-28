@@ -6,5 +6,6 @@ router.post('/', packageController.createPackage);
 router.get('/', packageController.getAllPackages);
 router.get('/package/:query', packageController.searchPackage);
 router.delete('/delete/:id', packageController.deletePackage);
+router.get('/preauth/:is_preauth', packageController.getPackageByPreauthFlag);
 
 module.exports = router;

@@ -50,6 +50,7 @@ async function initializeDatabase() {
         id INT AUTO_INCREMENT PRIMARY KEY,
         code VARCHAR(255) NOT NULL UNIQUE,
         name VARCHAR(255),
+        is_preauth TINYINT(1) NOT NULL DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -60,6 +61,7 @@ async function initializeDatabase() {
         package_id INT NOT NULL,
         code VARCHAR(255) NOT NULL UNIQUE,
         name VARCHAR(255),
+        is_complex TINYINT(1) NOT NULL DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (package_id) REFERENCES package(id) ON DELETE CASCADE
       );
@@ -77,8 +79,8 @@ async function initializeDatabase() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (intervention_id) REFERENCES intervention(id) ON DELETE CASCADE
       );
-    `);  
-    
+    `);
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS result (
         id INT AUTO_INCREMENT PRIMARY KEY,
