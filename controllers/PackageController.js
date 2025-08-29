@@ -51,7 +51,7 @@ const packageController = {
     getPackageByPreauthFlag: async (req, res) => {
         try {
             const { is_preauth } = req.params;
-            const packages = await Package.getPackageByPreauthFlag(is_preauth);
+            const packages = await Package.getPackageByPreauthFlag(1);
             res.json(packages);
         } catch (error) {
             console.error(error);
