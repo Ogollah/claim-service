@@ -105,7 +105,7 @@ class ClaimController {
         const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
         const maxRetries = 3;
-        const delayMs = 20000;
+        const delayMs = 10000;
         let state = 'pending';
         let claimResponseResult = null;
 
