@@ -6,5 +6,6 @@ router.post('/', providerController.createProvider);
 router.get('/', providerController.getAllProviders);
 router.get('/provider/:query', providerController.searchProvider);
 router.delete('/delete/:id', providerController.deleteProvider);
-router.get('/:f_id',providerController.getProviderByFID);
+router.get('/:f_id', providerController.getProviderByFID);
+router.put('/update/:id', providerController.updateProvider);
 module.exports = router;

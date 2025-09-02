@@ -1,21 +1,21 @@
 const pool = require("../config/db");
 
 class TestCase {
-    static async create(testcase){
-        const {intervention_id, name, description, code, test_config} = testcase;
+    static async create(testcase) {
+        const { intervention_id, name, description, code, test_config } = testcase;
         console.log(testcase);
-        
+
         const [result] = await pool.query(
             'INSERT INTO testcase(intervention_id, name, description, code, test_config) VALUES(?,?,?,?,?)', [intervention_id, name, description, code, JSON.stringify(test_config)]
         );
         return result.insertId;
     }
 
-    static async getall(){
+    static async getall() {
         const [rows] = await pool.query(`
             SELECT * FROM testcase ORDER BY created_at DESC
             `);
-            return rows;
+        return rows;
     }
     static async search(search) {
         let query = 'SELECT * FROM testcase WHERE 1=1';
@@ -25,17 +25,17 @@ class TestCase {
             query += ' AND cr_id LIKE ?';
             params.push(`%${search.cr_id}%`);
         }
-        
+
         if (search.gender) {
             query += ' AND gender = ?';
             params.push(search.gender);
         }
         query += ' LIMIT 100';
-        
+
         const [rows] = await pool.query(query, params);
         return rows;
     }
-    static async delete(id){
+    static async delete(id) {
         const [result] = await pool.query(`DELETE FROM testcase WHERE id = ?`, [id]);
         return result.affectedRows;
     }

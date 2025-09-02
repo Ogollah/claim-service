@@ -1,19 +1,19 @@
 const pool = require("../config/db");
 
 class Provider {
-    static async create(provider){
-        const {f_id, name, level, slade_code, status} = provider;
+    static async create(provider) {
+        const { f_id, name, level, slade_code, status } = provider;
         const [result] = await pool.query(
             'INSERT INTO provider(f_id, name, level, slade_code, status) VALUES(?,?,?,?,?)', [f_id, name, level, slade_code, status]
         );
         return result.insertId;
     }
 
-    static async getall(){
+    static async getall() {
         const [rows] = await pool.query(`
             SELECT * FROM provider ORDER BY created_at DESC
             `);
-            return rows;
+        return rows;
     }
     static async search(search) {
         let query = 'SELECT * FROM providers WHERE 1=1';
@@ -23,23 +23,31 @@ class Provider {
             query += ' AND cr_id LIKE ?';
             params.push(`%${search.cr_id}%`);
         }
-        
+
         if (search.gender) {
             query += ' AND gender = ?';
             params.push(search.gender);
         }
         query += ' LIMIT 100';
-        
+
         const [rows] = await pool.query(query, params);
         return rows;
     }
-    static async delete(id){
+    static async delete(id) {
         const [result] = await pool.query(`DELETE FROM provider WHERE id = ?`, [id]);
         return result.affectedRows;
     }
     static async getProviderByFID(f_id) {
         const [rows] = await pool.query(`SELECT * FROM provider WHERE f_id = ?`, [f_id]);
         return rows[0];
+    }
+    static async update(id, provider) {
+        const { f_id, name, level, slade_code, status } = provider;
+        const [result] = await pool.query(
+            `UPDATE provider SET f_id = ?, name = ?, level = ?, slade_code = ?, status = ? WHERE id = ?`,
+            [f_id, name, level, slade_code, status, id]
+        );
+        return result.affectedRows;
     }
 }
 
