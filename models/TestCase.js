@@ -44,9 +44,10 @@ class TestCase {
         return result;
     }
     static async updateTestConfig(id, newTestConfig) {
+        const { intervention_id, name, description, code, test_config } = newTestConfig;
         const [result] = await pool.query(
-            'UPDATE testcase SET test_config = ? WHERE id = ?',
-            [JSON.stringify(newTestConfig), id]
+            'UPDATE testcase SET intervention_id = ?, name = ?, description = ?, code = ?, test_config = ? WHERE id = ?',
+            [intervention_id, name, description, code, JSON.stringify(test_config), id]
         );
         return result.affectedRows;
     }
