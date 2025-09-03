@@ -88,7 +88,8 @@ class ClaimController {
           return res.status(preAuthResult.status || 400).json({
             success: false,
             message: 'Preauthorization submission failed',
-            error: { error: preAuthResult.error, fhirBundle: initialFhirBundle }
+            error: { error: preAuthResult.error, fhirBundle: initialFhirBundle },
+            preAuthResponseId
           });
         }
 
@@ -98,14 +99,15 @@ class ClaimController {
           return res.status(400).json({
             success: false,
             message: 'Could not determine preauthorization response ID',
-            error: { fhirBundle: initialFhirBundle }
+            error: { fhirBundle: initialFhirBundle },
+            preAuthResponseId
           });
         }
 
         const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
         const maxRetries = 3;
-        const delayMs = 10000;
+        const delayMs = 5000;
         let state = 'pending';
         let claimResponseResult = null;
 
@@ -116,7 +118,8 @@ class ClaimController {
             return res.status(claimResponseResult.status || 400).json({
               success: false,
               message: 'Failed to retrieve preauthorization response',
-              error: { error: claimResponseResult.error, fhirBundle: initialFhirBundle }
+              error: { error: claimResponseResult.error, fhirBundle: initialFhirBundle },
+              preAuthResponseId
             });
           }
 
