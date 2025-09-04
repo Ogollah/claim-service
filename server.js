@@ -1,5 +1,5 @@
 // server.js
-require('dotenv').config(); 
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -12,8 +12,39 @@ const InterventionRoutes = require('./routes/InterventionRoutes');
 const TestCaseRoutes = require('./routes/TestCaseRoutes');
 const ResultRoutes = require('./routes/ResultRoutes');
 const logger = require('./utils/logger');
+const swaggerUi = require('swagger-ui-express');
+const swaggerJSDoc = require('swagger-jsdoc');
 
 const app = express();
+
+// Swagger setup
+const swaggerOptions = {
+  swaggerDefinition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Claim & Benefit Testing System (CBTS) API',
+      version: '1.0.0',
+      description: 'API documentation for the Claim & Benefit Testing System (CBTS)',
+    },
+    servers: [
+      {
+        url: `http://localhost:${process.env.PORT || 5000}`,
+      },
+    ],
+    // components: {
+    //   securitySchemes: {
+    //     bearerAuth: {
+    //       type: 'http',
+    //       scheme: 'bearer',
+    //       bearerFormat: 'JWT',
+    //     },
+    //   },
+    // },
+  },
+  apis: ['./routes/*.js'],
+};
+
+
 
 // Middleware
 app.use(cors());
@@ -43,6 +74,9 @@ app.use((err, req, res, next) => {
   logger.error('Unhandled error', { error: err.message });
   res.status(500).json({ error: 'Internal server error' });
 });
+
+const swaggerDocs = swaggerJSDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
