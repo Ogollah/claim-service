@@ -77,6 +77,7 @@ class ClaimController {
       }
 
       const isPreauth = formData.use === 'preauth-claim';
+      const is_bundle_only = formData.is_bundle_only || false;
       let preAuthResponseId = null;
 
       if (isPreauth) {
@@ -106,8 +107,8 @@ class ClaimController {
 
         const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-        const maxRetries = 3;
-        const delayMs = 5000;
+        const maxRetries = 2;
+        const delayMs = 3000;
         let state = 'pending';
         let claimResponseResult = null;
 
@@ -146,6 +147,15 @@ class ClaimController {
 
       // Continue with final claim submission
       const fhirBundle = buildFhirClaimBundle.transformFormToFhirBundle(formData, preAuthResponseId);
+
+      if (is_bundle_only) {
+        return res.status(200).json({
+          success: true,
+          message: 'Bundle only request processed successfully',
+          error: { is_bundle_only, preAuthResponseId, fhirBundle },
+          fhirBundle
+        });
+      }
 
       const result = await apiClientService.submitClaimBundle(fhirBundle, this.apiKey);
 
