@@ -6,7 +6,8 @@ class Package {
         const [result] = await pool.query(
             'INSERT INTO package(code, name) VALUES(?,?)', [code, name]
         );
-        return result.insertId;
+        const [rows] = await pool.query('SELECT * FROM package WHERE id = ?', [result.insertId]);
+        return rows[0];
     }
 
     static async getall() {
@@ -34,13 +35,28 @@ class Package {
         return rows;
     }
     static async delete(id) {
+        await pool.query(`DELETE FROM intervention WHERE package_id = ?`, [id]);
         const [result] = await pool.query(`DELETE FROM package WHERE id = ?`, [id]);
         return result.affectedRows;
     }
+    // static async delete(id) {
+    //     const [result] = await pool.query(`DELETE FROM package WHERE id = ?`, [id]);
+    //     return result.affectedRows;
+    // }
     static async getPackageByPreauthFlag(is_preauth) {
         const [res] = await pool.query(`SELECT * FROM package WHERE is_preauth = ?`, [is_preauth]);
         console.log('response:', res, is_preauth);
         return res;
+    }
+    static async updatePreauthFlag(id, is_preauth) {
+        const [result] = await pool.query(`UPDATE package SET is_preauth = ? WHERE id = ?`, [is_preauth, id]);
+        return result.affectedRows;
+    }
+    static async updatePackage(id, shaPackage) {
+        const { code, name } = shaPackage;
+        const [result] = await pool.query(`UPDATE package SET name = ?, code = ? WHERE id = ?`, [name, code, id]);
+        const [rows] = await pool.query('SELECT * FROM package WHERE id = ?', [id]);
+        return rows[0];
     }
 }
 

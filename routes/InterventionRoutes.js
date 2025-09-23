@@ -119,4 +119,38 @@ router.get('/code/:code', interventionController.getInterventionByCode);
  *         description: Intervention retrieved
  */
 router.get('/complex/:is_complex', interventionController.getInterventionByComplex);
+
+/**
+ * @swagger
+ * /api/interventions/update/{id}:
+ *   put:
+ *     summary: Update an intervention by ID
+ *     tags: [Interventions]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The intervention's ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               package_id:
+ *                 type: string
+ *               code:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *               is_complex:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Intervention updated successfully
+ */
+router.put('/update/:id', interventionController.updateIntervention);
 module.exports = router;

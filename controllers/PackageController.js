@@ -57,8 +57,23 @@ const packageController = {
             console.error(error);
             res.status(500).json({ message: 'Server error' });
         }
-    }
+    },
+    updatePackage: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { code, name } = req.body;
+            const updatedPackage = await Package.updatePackage(id, { code, name });
 
+            if (updatedPackage) {
+                res.json({ message: 'Package updated successfully', updatedPackage });
+            } else {
+                res.status(404).json({ message: 'Package not found' });
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Server error' });
+        }
+    }
 }
 
 module.exports = packageController;

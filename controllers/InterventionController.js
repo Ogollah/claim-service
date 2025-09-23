@@ -4,11 +4,27 @@ const pool = require('../config/db');
 const interventionController = {
     createIntervention: async (req, res) => {
         try {
-            const { package_id, code, name } = req.body;
+            const { package_id, code, name, is_complex } = req.body;
             const intervention = await Intervention.create({
-                package_id, code, name
+                package_id, code, name, is_complex
             });
             res.status(201).json({ message: 'Intervention created successfully', intervention });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Server error' });
+        }
+    },
+
+    updateIntervention: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { package_id, code, name, is_complex } = req.body;
+            const updatedIntervention = await Intervention.update(id, { package_id, code, name, is_complex });
+            if (updatedIntervention) {
+                res.json({ message: 'Intervention updated successfully', updatedIntervention });
+            } else {
+                res.status(404).json({ message: 'Intervention not found' });
+            }
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Server error' });

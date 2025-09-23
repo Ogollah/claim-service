@@ -100,4 +100,34 @@ router.delete('/delete/:id', packageController.deletePackage);
  */
 router.get('/preauth/:is_preauth', packageController.getPackageByPreauthFlag);
 
+/**
+ * @swagger
+ * /api/packages/update/{id}:
+ *   put:
+ *     summary: Update a package by ID
+ *     tags: [Packages]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The package's ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               code:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Package updated
+ */
+router.put('/update/:id', packageController.updatePackage);
+
 module.exports = router;
