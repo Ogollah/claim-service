@@ -2,18 +2,18 @@ const pool = require("../config/db");
 
 class Intervention {
     static async create(intervention) {
-        const { package_id, code, name, is_complex } = intervention;
+        const { package_id, code, name, is_complex, created_by, updated_by } = intervention;
         const [result] = await pool.query(
-            'INSERT INTO intervention(package_id, code, name, is_complex) VALUES(?,?,?,?)', [package_id, code, name, is_complex]
+            'INSERT INTO intervention(package_id, code, name, is_complex, created_by, updated_by) VALUES(?,?,?,?,?,?)', [package_id, code, name, is_complex, created_by, updated_by]
         );
         const [rows] = await pool.query('SELECT * FROM intervention WHERE id = ?', [result.insertId]);
         return rows[0];
     }
 
     static async update(id, intervention) {
-        const { package_id, code, name, is_complex } = intervention;
+        const { package_id, code, name, is_complex, updated_by } = intervention;
         const [result] = await pool.query(
-            'UPDATE intervention SET package_id = ?, code = ?, name = ?, is_complex = ? WHERE id = ?', [package_id, code, name, is_complex, id]
+            'UPDATE intervention SET package_id = ?, code = ?, name = ?, is_complex = ?, updated_by = ? WHERE id = ?', [package_id, code, name, is_complex, updated_by, id]
         );
         const [rows] = await pool.query('SELECT * FROM intervention WHERE id = ?', [id]);
         return rows[0];

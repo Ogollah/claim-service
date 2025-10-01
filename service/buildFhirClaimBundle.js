@@ -30,7 +30,7 @@ class FhirClaimBundleService {
     const transformedPayload = {
       meta: {
         profile: [
-          `${FHIR_RESOURCES.IDENTIFIER_SYSTEMS.STRUCTURED_DEFINATION}/bundle|1.0.0`,
+          `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/StructureDefinition/bundle|1.0.0`,
         ]
       },
       timestamp: new Date().toISOString(),
@@ -76,7 +76,7 @@ class FhirClaimBundleService {
         ],
         status: "active",
         beneficiary: {
-          reference: `${FHIR_SERVER.BASE_URL}/Patient/${patientData.id}`,
+          reference: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Patient/${patientData.id}`,
           type: "Patient"
         },
         resourceType: "Coverage"

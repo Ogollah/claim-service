@@ -2,9 +2,9 @@ const pool = require("../config/db");
 
 class Package {
     static async create(shaPackage) {
-        const { code, name } = shaPackage;
+        const { code, name, created_by, updated_by } = shaPackage;
         const [result] = await pool.query(
-            'INSERT INTO package(code, name) VALUES(?,?)', [code, name]
+            'INSERT INTO package(code, name, created_by, updated_by) VALUES(?,?,?,?)', [code, name, created_by, updated_by]
         );
         const [rows] = await pool.query('SELECT * FROM package WHERE id = ?', [result.insertId]);
         return rows[0];
@@ -53,8 +53,8 @@ class Package {
         return result.affectedRows;
     }
     static async updatePackage(id, shaPackage) {
-        const { code, name } = shaPackage;
-        const [result] = await pool.query(`UPDATE package SET name = ?, code = ? WHERE id = ?`, [name, code, id]);
+        const { code, name, updated_by } = shaPackage;
+        const [result] = await pool.query(`UPDATE package SET name = ?, code = ?, updated_by = ? WHERE id = ?`, [name, code, updated_by, id]);
         const [rows] = await pool.query('SELECT * FROM package WHERE id = ?', [id]);
         return rows[0];
     }

@@ -2,11 +2,11 @@ const pool = require("../config/db");
 
 class TestCase {
     static async create(testcase) {
-        const { intervention_id, name, description, code, test_config } = testcase;
+        const { intervention_id, name, description, code, test_config, created_by, updated_by } = testcase;
         console.log(testcase);
 
         const [result] = await pool.query(
-            'INSERT INTO testcase(intervention_id, name, description, code, test_config) VALUES(?,?,?,?,?)', [intervention_id, name, description, code, JSON.stringify(test_config)]
+            'INSERT INTO testcase(intervention_id, name, description, code, test_config, created_by, updated_by) VALUES(?,?,?,?,?,?,?)', [intervention_id, name, description, code, JSON.stringify(test_config), created_by, updated_by]
         );
         return result.insertId;
     }
@@ -44,10 +44,10 @@ class TestCase {
         return result;
     }
     static async updateTestConfig(id, newTestConfig) {
-        const { intervention_id, name, description, code, test_config } = newTestConfig;
+        const { intervention_id, name, description, code, test_config, updated_by } = newTestConfig;
         const [result] = await pool.query(
-            'UPDATE testcase SET intervention_id = ?, name = ?, description = ?, code = ?, test_config = ? WHERE id = ?',
-            [intervention_id, name, description, code, JSON.stringify(test_config), id]
+            'UPDATE testcase SET intervention_id = ?, name = ?, description = ?, code = ?, test_config = ?, updated_by = ? WHERE id = ?',
+            [intervention_id, name, description, code, JSON.stringify(test_config), updated_by, id]
         );
         return result.affectedRows;
     }
