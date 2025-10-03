@@ -14,11 +14,11 @@ const ResultController = {
   },
 
   async create(req, res) {
-    const { testcase_id, result_status, claim_id, response_id, status_code, message, detail } = req.body;
+    const { testcase_id, result_status, claim_id, response_id, status_code, message, detail, created_by, updated_by } = req.body;
     if (result_status === undefined || !testcase_id)
       return res.status(400).json({ error: 'Missing fields' });
 
-    const newResult = await ResultModel.createResult(testcase_id, result_status, claim_id, response_id, status_code, message, detail);
+    const newResult = await ResultModel.createResult(testcase_id, result_status, claim_id, response_id, status_code, message, detail, created_by, updated_by);
     res.status(201).json(newResult);
   },
 

@@ -4,9 +4,9 @@ const pool = require('../config/db');
 const packageController = {
     createPackage: async (req, res) => {
         try {
-            const { code, name } = req.body;
+            const { code, name, created_by, updated_by } = req.body;
             const shaPackage = await Package.create({
-                code, name
+                code, name, created_by, updated_by
             });
             res.status(201).json({ message: 'Package created successfully', shaPackage });
         } catch (error) {
@@ -61,8 +61,8 @@ const packageController = {
     updatePackage: async (req, res) => {
         try {
             const { id } = req.params;
-            const { code, name } = req.body;
-            const updatedPackage = await Package.updatePackage(id, { code, name });
+            const { code, name, updated_by } = req.body;
+            const updatedPackage = await Package.updatePackage(id, { code, name, updated_by });
 
             if (updatedPackage) {
                 res.json({ message: 'Package updated successfully', updatedPackage });

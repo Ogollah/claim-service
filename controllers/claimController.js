@@ -7,7 +7,27 @@ const {
 
 class ClaimController {
   constructor() {
+    // Initialize with default values, will be overridden per request
     this.apiKey = process.env.API_KEY;
+    this.apiBaseUrl = process.env.API_BASE_URL;
+  }
+
+  /**
+   * Get the appropriate API key based on environment
+   * @param {boolean} isDev - Whether to use dev environment
+   * @returns {string} API key
+   */
+  getApiKey = (isDev) => {
+    return isDev ? process.env.API_KEY_DEV : process.env.API_KEY;
+  }
+
+  /**
+   * Get the appropriate API base URL based on environment
+   * @param {boolean} isDev - Whether to use dev environment
+   * @returns {string} API base URL
+   */
+  getApiBaseUrl = (isDev) => {
+    return isDev ? process.env.API_BASE_URL_DEV : process.env.API_BASE_URL;
   }
 
   /**
@@ -63,27 +83,40 @@ class ClaimController {
    * @param {Object} req - Express request object
    * @param {Object} res - Express response object
    */
-
   submitClaim = async (req, res) => {
+    let initialFhirBundle;
+
     try {
       const { formData } = req.body;
 
       if (!formData) {
         return res.status(400).json({
           success: false,
-          message: 'Missing required parameters: formData',
-          error: { fhirBundle: initialFhirBundle }
+          message: 'Missing required parameters: formData'
         });
       }
+
+      // Get environment from request
+      const isDev = formData.is_dev || false;
+      console.log("this is formDta: ", formData);
+
+      const apiKey = this.getApiKey(isDev);
+      const apiBaseUrl = this.getApiBaseUrl(isDev);
+
+      console.log('custome ', apiBaseUrl, apiKey, isDev);
+
+
+      console.log(`Environment: ${isDev ? 'Development' : 'QA'}`);
+      console.log(`API Base URL: ${apiBaseUrl}`);
 
       const isPreauth = formData.use === 'preauth-claim';
       const is_bundle_only = formData.is_bundle_only || false;
       let preAuthResponseId = null;
 
       if (isPreauth) {
-        const initialFhirBundle = buildFhirClaimBundle.transformFormToFhirBundle(formData);
+        initialFhirBundle = buildFhirClaimBundle.transformFormToFhirBundle(formData, null, isDev);
 
-        const preAuthResult = await apiClientService.submitClaimBundle(initialFhirBundle, this.apiKey);
+        const preAuthResult = await apiClientService.submitClaimBundle(initialFhirBundle, apiKey, isDev);
 
         if (!preAuthResult.success) {
           return res.status(preAuthResult.status || 400).json({
@@ -107,13 +140,13 @@ class ClaimController {
 
         const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-        const maxRetries = 2;
-        const delayMs = 3000;
+        const maxRetries = 3;
+        const delayMs = 5000;
         let state = 'pending';
         let claimResponseResult = null;
 
         for (let attempt = 0; attempt <= maxRetries; attempt++) {
-          claimResponseResult = await apiClientService.getClaimResponse(preAuthResponseId, this.apiKey);
+          claimResponseResult = await apiClientService.getClaimResponse(preAuthResponseId, apiKey, isDev);
 
           if (!claimResponseResult.success) {
             return res.status(claimResponseResult.status || 400).json({
@@ -146,18 +179,18 @@ class ClaimController {
       }
 
       // Continue with final claim submission
-      const fhirBundle = buildFhirClaimBundle.transformFormToFhirBundle(formData, preAuthResponseId);
+      const fhirBundle = buildFhirClaimBundle.transformFormToFhirBundle(formData, preAuthResponseId, isDev);
 
       if (is_bundle_only) {
         return res.status(200).json({
           success: true,
           message: 'Bundle only request processed successfully',
-          error: { is_bundle_only, preAuthResponseId, fhirBundle },
+          data: { is_bundle_only, preAuthResponseId, fhirBundle },
           fhirBundle
         });
       }
 
-      const result = await apiClientService.submitClaimBundle(fhirBundle, this.apiKey);
+      const result = await apiClientService.submitClaimBundle(fhirBundle, apiKey, isDev);
 
       return res.status(result.success ? 200 : result.status || 400).json({
         success: result.success,
@@ -182,11 +215,10 @@ class ClaimController {
       return res.status(500).json({
         success: false,
         message: 'Internal server error',
-        error: { error: error, fhirBundle: initialFhirBundle }
+        error: { error: error.message }
       });
     }
   }
-
 
   getClaimResponse = async (req, res) => {
     try {
@@ -198,7 +230,11 @@ class ClaimController {
         });
       }
 
-      const resp = await apiClientService.getClaimResponse(claimId, this.apiKey);
+      // For getClaimResponse, you might want to pass isDev as a query parameter
+      const isDev = req.query.isDev === 'true' || false;
+      const apiKey = this.getApiKey(isDev);
+
+      const resp = await apiClientService.getClaimResponse(claimId, apiKey, isDev);
       return res.json(resp);
     } catch (error) {
       console.error('Error getting claim response:', error);

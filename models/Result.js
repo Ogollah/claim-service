@@ -11,20 +11,20 @@ const ResultModel = {
     return rows[0];
   },
 
-  async createResult(testcase_id, result_status, claim_id, response_id, status_code, message, detail) {
+  async createResult(testcase_id, result_status, claim_id, response_id, status_code, message, detail, created_by, updated_by) {
     const [result] = await pool.query(
-      'INSERT INTO result (testcase_id, result_status, claim_id, response_id, status_code, message, detail) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [testcase_id, result_status, claim_id, response_id, status_code, message, detail]
+      'INSERT INTO result (testcase_id, result_status, claim_id, response_id, status_code, message, detail, created_by, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [testcase_id, result_status, claim_id, response_id, status_code, message, detail, created_by, updated_by]
     );
-    return { id: result.insertId, testcase_id, result_status, claim_id, response_id, status_code, message, detail };
+    return { id: result.insertId, testcase_id, result_status, claim_id, response_id, status_code, message, detail, created_by, updated_by };
   },
 
-  async updateResult(id, result_status) {
+  async updateResult(id, result_status, updated_by) {
     await pool.query(
-      'UPDATE result SET result_status = ? WHERE id = ?',
-      [result_status, id]
+      'UPDATE result SET result_status = ?, updated_by = ? WHERE id = ?',
+      [result_status, updated_by, id]
     );
-    return { id, result_status };
+    return { id, result_status, updated_by };
   },
 
   async deleteResult(id) {
