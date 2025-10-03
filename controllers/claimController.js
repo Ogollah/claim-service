@@ -84,7 +84,7 @@ class ClaimController {
    * @param {Object} res - Express response object
    */
   submitClaim = async (req, res) => {
-    let initialFhirBundle; // Define here to use in catch block
+    let initialFhirBundle;
 
     try {
       const { formData } = req.body;
@@ -103,6 +103,9 @@ class ClaimController {
       const apiKey = this.getApiKey(isDev);
       const apiBaseUrl = this.getApiBaseUrl(isDev);
 
+      console.log('custome ', apiBaseUrl, apiKey, isDev);
+
+
       console.log(`Environment: ${isDev ? 'Development' : 'QA'}`);
       console.log(`API Base URL: ${apiBaseUrl}`);
 
@@ -111,9 +114,9 @@ class ClaimController {
       let preAuthResponseId = null;
 
       if (isPreauth) {
-        initialFhirBundle = buildFhirClaimBundle.transformFormToFhirBundle(formData);
+        initialFhirBundle = buildFhirClaimBundle.transformFormToFhirBundle(formData, null, isDev);
 
-        const preAuthResult = await apiClientService.submitClaimBundle(initialFhirBundle, apiKey);
+        const preAuthResult = await apiClientService.submitClaimBundle(initialFhirBundle, apiKey, isDev);
 
         if (!preAuthResult.success) {
           return res.status(preAuthResult.status || 400).json({
@@ -143,7 +146,7 @@ class ClaimController {
         let claimResponseResult = null;
 
         for (let attempt = 0; attempt <= maxRetries; attempt++) {
-          claimResponseResult = await apiClientService.getClaimResponse(preAuthResponseId, apiKey);
+          claimResponseResult = await apiClientService.getClaimResponse(preAuthResponseId, apiKey, isDev);
 
           if (!claimResponseResult.success) {
             return res.status(claimResponseResult.status || 400).json({
@@ -176,7 +179,7 @@ class ClaimController {
       }
 
       // Continue with final claim submission
-      const fhirBundle = buildFhirClaimBundle.transformFormToFhirBundle(formData, preAuthResponseId);
+      const fhirBundle = buildFhirClaimBundle.transformFormToFhirBundle(formData, preAuthResponseId, isDev);
 
       if (is_bundle_only) {
         return res.status(200).json({
@@ -187,7 +190,7 @@ class ClaimController {
         });
       }
 
-      const result = await apiClientService.submitClaimBundle(fhirBundle, apiKey);
+      const result = await apiClientService.submitClaimBundle(fhirBundle, apiKey, isDev);
 
       return res.status(result.success ? 200 : result.status || 400).json({
         success: result.success,
@@ -231,7 +234,7 @@ class ClaimController {
       const isDev = req.query.isDev === 'true' || false;
       const apiKey = this.getApiKey(isDev);
 
-      const resp = await apiClientService.getClaimResponse(claimId, apiKey);
+      const resp = await apiClientService.getClaimResponse(claimId, apiKey, isDev);
       return res.json(resp);
     } catch (error) {
       console.error('Error getting claim response:', error);

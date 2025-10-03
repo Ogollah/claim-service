@@ -47,10 +47,13 @@ class ApiClientService {
    * @param {boolean} isDev - Whether to use dev environment
    * @returns {Promise<Object>} API response
    */
-  async submitClaimBundle(fhirBundle, apiKey, isDev = false) {
+  async submitClaimBundle(fhirBundle, apiKey, isDev) {
     try {
       const baseURL = this.getBaseUrl(isDev);
       const client = this.createClient(baseURL, apiKey);
+
+      console.log('submitclaim: ', isDev, baseURL);
+
 
       logger.info('Submitting claim bundle', {
         environment: isDev ? 'Development' : 'QA',
@@ -100,7 +103,7 @@ class ApiClientService {
    * @param {boolean} isDev - Whether to use dev environment
    * @returns {Promise<Object>} API response
    */
-  async getClaimResponse(claimId, apiKey, isDev = false) {
+  async getClaimResponse(claimId, apiKey, isDev) {
     if (!claimId) {
       logger.error('Missing claimId parameter');
       throw new Error('claimId is required');

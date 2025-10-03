@@ -19,11 +19,12 @@ class FhirClaimBundleService {
     return undefined;
   }
 
-  transformFormToFhirBundle(formData, preAuthResponseId = null) {
+  transformFormToFhirBundle(formData, preAuthResponseId = null, isDev = null) {
+
     const relatedId = formData?.relatedClaimId;
     const response = preAuthResponseId;
     const resp = relatedId || response || null;
-    const is_dev = formData?.is_dev;
+    const is_dev = formData?.is_dev || isDev;
     const is_bundle_only = formData?.is_bundle_only;
 
     // Create the base payload
@@ -133,6 +134,10 @@ class FhirClaimBundleService {
   }
 
   _createPatientEntry(patientData, is_dev) {
+    const cleanNameParts = (patientData.name || '')
+      .split(' ')
+      .map(p => p.trim())
+      .filter(p => p !== '');
     return {
       fullUrl: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Patient/${patientData.id}`,
       resource: {
@@ -169,9 +174,9 @@ class FhirClaimBundleService {
         ],
         name: [
           {
-            text: patientData.name,
-            family: patientData.name.split(' ').pop(),
-            given: [...patientData.name.split(' ').slice(0, -1)]
+            text: patientData.name || '',
+            family: cleanNameParts.slice(-1)[0] || '',
+            given: cleanNameParts.slice(0, -1)
           }
         ]
       }
