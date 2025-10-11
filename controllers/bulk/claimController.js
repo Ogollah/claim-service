@@ -69,7 +69,10 @@ class ClaimController {
 
             const { isDev, batchSize = 1000 } = req.body;
 
-            const apiKey = this.getApiKey(isDev);
+            const isDevelopment = isDev === 'true' ? true : false;
+
+            const apiKey = this.getApiKey(isDevelopment);
+
 
             const filePath = req.file.path;
 
@@ -84,7 +87,7 @@ class ClaimController {
             }
 
             const result = await bulkClaimProcessor.processBulkClaims(filePath, {
-                isDev: isDev,
+                isDev: isDevelopment,
                 apiKey,
                 batchSize: parseInt(batchSize)
             });
@@ -401,8 +404,6 @@ class ClaimController {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     }
 
-    // ========== EXISTING SINGLE CLAIM METHODS ==========
-
     /**
      * Extracts the preauthorization response ID from the API response
      */
@@ -454,137 +455,134 @@ class ClaimController {
     /**
      * Processes form data and submits FHIR claim
      */
-    submitClaim = async (req, res) => {
-        let initialFhirBundle;
+    // submitClaim = async (req, res) => {
+    //     let initialFhirBundle;
 
-        try {
-            const { formData } = req.body;
+    //     try {
+    //         const { formData } = req.body;
 
-            if (!formData) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Missing required parameters: formData'
-                });
-            }
+    //         if (!formData) {
+    //             return res.status(400).json({
+    //                 success: false,
+    //                 message: 'Missing required parameters: formData'
+    //             });
+    //         }
 
-            // Get environment from request
-            const isDev = formData.is_dev || false;
-            console.log("Processing claim form data");
 
-            const apiKey = this.getApiKey(isDev);
+    //         const apiKey = this.getApiKey(isDev);
 
-            console.log(`Environment: ${isDev ? 'Development' : 'QA'}`);
+    //         console.log(`Environment: ${isDev ? 'Development' : 'QA'}`);
 
-            const isPreauth = formData.use === 'preauth-claim';
-            const is_bundle_only = formData.is_bundle_only || false;
-            let preAuthResponseId = null;
+    //         const isPreauth = formData.use === 'preauth-claim';
+    //         const is_bundle_only = formData.is_bundle_only || false;
+    //         let preAuthResponseId = null;
 
-            if (isPreauth) {
-                initialFhirBundle = buildFhirClaimBundle.transformFormToFhirBundle(formData);
+    //         if (isPreauth) {
+    //             initialFhirBundle = buildFhirClaimBundle.transformFormToFhirBundle(formData);
 
-                const preAuthResult = await apiClientService.submitClaimBundle(initialFhirBundle, apiKey, isDev);
+    //             const preAuthResult = await apiClientService.submitClaimBundle(initialFhirBundle, apiKey, isDev);
 
-                if (!preAuthResult.success) {
-                    return res.status(preAuthResult.status || 400).json({
-                        success: false,
-                        message: 'Preauthorization submission failed',
-                        error: { error: preAuthResult.error, fhirBundle: initialFhirBundle },
-                        preAuthResponseId
-                    });
-                }
+    //             if (!preAuthResult.success) {
+    //                 return res.status(preAuthResult.status || 400).json({
+    //                     success: false,
+    //                     message: 'Preauthorization submission failed',
+    //                     error: { error: preAuthResult.error, fhirBundle: initialFhirBundle },
+    //                     preAuthResponseId
+    //                 });
+    //             }
 
-                preAuthResponseId = this.extractPreAuthResponseId(preAuthResult.data);
+    //             preAuthResponseId = this.extractPreAuthResponseId(preAuthResult.data);
 
-                if (!preAuthResponseId) {
-                    return res.status(400).json({
-                        success: false,
-                        message: 'Could not determine preauthorization response ID',
-                        error: { fhirBundle: initialFhirBundle },
-                        preAuthResponseId
-                    });
-                }
+    //             if (!preAuthResponseId) {
+    //                 return res.status(400).json({
+    //                     success: false,
+    //                     message: 'Could not determine preauthorization response ID',
+    //                     error: { fhirBundle: initialFhirBundle },
+    //                     preAuthResponseId
+    //                 });
+    //             }
 
-                const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+    //             const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-                const maxRetries = 3;
-                const delayMs = 5000;
-                let state = 'pending';
-                let claimResponseResult = null;
+    //             const maxRetries = 3;
+    //             const delayMs = 5000;
+    //             let state = 'pending';
+    //             let claimResponseResult = null;
 
-                for (let attempt = 0; attempt <= maxRetries; attempt++) {
-                    claimResponseResult = await apiClientService.getClaimResponse(preAuthResponseId, apiKey, isDev);
+    //             for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    //                 claimResponseResult = await apiClientService.getClaimResponse(preAuthResponseId, apiKey, isDev);
 
-                    if (!claimResponseResult.success) {
-                        return res.status(claimResponseResult.status || 400).json({
-                            success: false,
-                            message: 'Failed to retrieve preauthorization response',
-                            error: { error: claimResponseResult.error, fhirBundle: initialFhirBundle },
-                            preAuthResponseId
-                        });
-                    }
+    //                 if (!claimResponseResult.success) {
+    //                     return res.status(claimResponseResult.status || 400).json({
+    //                         success: false,
+    //                         message: 'Failed to retrieve preauthorization response',
+    //                         error: { error: claimResponseResult.error, fhirBundle: initialFhirBundle },
+    //                         preAuthResponseId
+    //                     });
+    //                 }
 
-                    state = this.getClaimState(claimResponseResult.data);
+    //                 state = this.getClaimState(claimResponseResult.data);
 
-                    if (state === 'approved') {
-                        break;
-                    }
-                    claim
-                    if (attempt < maxRetries) {
-                        await delay(delayMs);
-                    }
-                }
+    //                 if (state === 'approved') {
+    //                     break;
+    //                 }
+    //                 claim
+    //                 if (attempt < maxRetries) {
+    //                     await delay(delayMs);
+    //                 }
+    //             }
 
-                if (state !== 'approved') {
-                    return res.status(400).json({
-                        success: false,
-                        message: 'Preauthorization not approved, current state: ' + state,
-                        error: { claimResponseResult, fhirBundle: initialFhirBundle },
-                        preAuthResponseId
-                    });
-                }
-            }
+    //             if (state !== 'approved') {
+    //                 return res.status(400).json({
+    //                     success: false,
+    //                     message: 'Preauthorization not approved, current state: ' + state,
+    //                     error: { claimResponseResult, fhirBundle: initialFhirBundle },
+    //                     preAuthResponseId
+    //                 });
+    //             }
+    //         }
 
-            // Continue with final claim submission
-            const fhirBundle = buildFhirClaimBundle.transformFormToFhirBundle(formData, preAuthResponseId);
+    //         // Continue with final claim submission
+    //         const fhirBundle = buildFhirClaimBundle.transformFormToFhirBundle(formData, preAuthResponseId);
 
-            if (is_bundle_only) {
-                return res.status(200).json({
-                    success: true,
-                    message: 'Bundle only request processed successfully',
-                    data: { is_bundle_only, preAuthResponseId, fhirBundle },
-                    fhirBundle
-                });
-            }
+    //         if (is_bundle_only) {
+    //             return res.status(200).json({
+    //                 success: true,
+    //                 message: 'Bundle only request processed successfully',
+    //                 data: { is_bundle_only, preAuthResponseId, fhirBundle },
+    //                 fhirBundle
+    //             });
+    //         }
 
-            const result = await apiClientService.submitClaimBundle(fhirBundle, apiKey, isDev);
+    //         const result = await apiClientService.submitClaimBundle(fhirBundle, apiKey, isDev);
 
-            return res.status(result.success ? 200 : result.status || 400).json({
-                success: result.success,
-                message: result.success ?
-                    (isPreauth ? 'Preauthorized claim submitted successfully' : 'Claim submitted successfully') :
-                    'Failed to submit claim',
-                ...(result.success ? {
-                    data: result,
-                    fhirBundle,
-                    isPreauth,
-                    preAuthResponseId
-                } : {
-                    error: {
-                        ...result,
-                        fhirBundle
-                    },
-                })
-            });
+    //         return res.status(result.success ? 200 : result.status || 400).json({
+    //             success: result.success,
+    //             message: result.success ?
+    //                 (isPreauth ? 'Preauthorized claim submitted successfully' : 'Claim submitted successfully') :
+    //                 'Failed to submit claim',
+    //             ...(result.success ? {
+    //                 data: result,
+    //                 fhirBundle,
+    //                 isPreauth,
+    //                 preAuthResponseId
+    //             } : {
+    //                 error: {
+    //                     ...result,
+    //                     fhirBundle
+    //                 },
+    //             })
+    //         });
 
-        } catch (error) {
-            console.error('Claim submission error:', error);
-            return res.status(500).json({
-                success: false,
-                message: 'Internal server error',
-                error: { error: error.message }
-            });
-        }
-    }
+    //     } catch (error) {
+    //         console.error('Claim submission error:', error);
+    //         return res.status(500).json({
+    //             success: false,
+    //             message: 'Internal server error',
+    //             error: { error: error.message }
+    //         });
+    //     }
+    // }
 
     getClaimResponse = async (req, res) => {
         try {
@@ -612,20 +610,19 @@ class ClaimController {
         }
     }
 
-    // ========== KEEP YOUR EXISTING METHODS ==========
-
     /**
      * Get the appropriate API key based on environment
      */
     getApiKey = (isDev) => {
-        return isDev ? process.env.API_KEY_DEV : process.env.API_KEY;
+        return isDev === true ? process.env.API_KEY_DEV : process.env.API_KEY;
     }
 
     /**
      * Get the appropriate API base URL based on environment
      */
     getApiBaseUrl = (isDev) => {
-        return isDev ? process.env.API_BASE_URL_DEV : process.env.API_BASE_URL;
+
+        return isDev === true ? process.env.API_BASE_URL_DEV : process.env.API_BASE_URL;
     }
 
     /**

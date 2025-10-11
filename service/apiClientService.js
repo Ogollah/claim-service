@@ -36,8 +36,7 @@ class ApiClientService {
    * @returns {string} API base URL
    */
   getBaseUrl(isDev) {
-    isDev
-    return isDev ? process.env.API_BASE_URL_DEV || 'https://dev-payers.apeiro-digital.com/api/v1/' : process.env.API_BASE_URL || 'https://qa-payers.apeiro-digital.com/api/v1/';
+    return isDev === true ? process.env.API_BASE_URL_DEV || 'https://dev-payers.apeiro-digital.com/api/v1/' : process.env.API_BASE_URL || 'https://qa-payers.apeiro-digital.com/api/v1/';
   }
 
   /**
@@ -52,11 +51,9 @@ class ApiClientService {
       const baseURL = this.getBaseUrl(isDev);
       const client = this.createClient(baseURL, apiKey);
 
-      console.log('submitclaim: ', isDev, baseURL);
-
 
       logger.info('Submitting claim bundle', {
-        environment: isDev ? 'Development' : 'QA',
+        environment: isDev === true ? 'Development' : 'QA',
         baseURL: baseURL,
         claimId: fhirBundle.id,
         endpoint: 'claim/bundle'
@@ -67,7 +64,7 @@ class ApiClientService {
       logger.info('Claim bundle submitted successfully', {
         status: response.status,
         claimId: fhirBundle.id,
-        environment: isDev ? 'Development' : 'QA',
+        environment: isDev === true ? 'Development' : 'QA',
         endpoint: 'claim/bundle'
       });
 
@@ -84,7 +81,7 @@ class ApiClientService {
         status: errorStatus,
         error: errorData,
         claimId: fhirBundle.id,
-        environment: isDev ? 'Development' : 'QA',
+        environment: isDev === true ? 'Development' : 'QA',
         endpoint: 'claim/bundle'
       });
 

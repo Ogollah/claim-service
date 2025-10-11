@@ -31,7 +31,7 @@ class FhirClaimBundleService {
     const transformedPayload = {
       meta: {
         profile: [
-          `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/StructureDefinition/bundle|1.0.0`,
+          `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/StructureDefinition/bundle|1.0.0`,
         ]
       },
       timestamp: new Date().toISOString(),
@@ -56,7 +56,7 @@ class FhirClaimBundleService {
 
   _createCoverageEntry(patientData, is_dev) {
     return {
-      fullUrl: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Coverage/${patientData.id}-${FHIR_SERVER.VALUE_STRINGS.COVERAGE}`,
+      fullUrl: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Coverage/${patientData.id}-${FHIR_SERVER.VALUE_STRINGS.COVERAGE}`,
       resource: {
         id: `${patientData.id}-${FHIR_SERVER.VALUE_STRINGS.COVERAGE}`,
         extension: [
@@ -77,7 +77,7 @@ class FhirClaimBundleService {
         ],
         status: "active",
         beneficiary: {
-          reference: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Patient/${patientData.id}`,
+          reference: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Patient/${patientData.id}`,
           type: "Patient"
         },
         resourceType: "Coverage"
@@ -87,12 +87,12 @@ class FhirClaimBundleService {
 
   _createOrganizationEntry(providerData, is_dev) {
     return {
-      fullUrl: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Organization/${providerData.id}`,
+      fullUrl: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Organization/${providerData.id}`,
       resource: {
         identifier: [
           {
             use: 'official',
-            system: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/license/provider-license`,
+            system: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/license/provider-license`,
             value: "PR-FHIR"
           }
         ],
@@ -101,7 +101,7 @@ class FhirClaimBundleService {
           {
             coding: [
               {
-                system: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/terminology/CodeSystem/organization-type`,
+                system: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/terminology/CodeSystem/organization-type`,
                 code: "prov",
               }
             ]
@@ -111,17 +111,17 @@ class FhirClaimBundleService {
         id: providerData.id,
         meta: {
           profile: [
-            `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/StructureDefinition/provider-organization|1.0.0`
+            `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/StructureDefinition/provider-organization|1.0.0`
           ]
         },
         name: providerData.name,
         extension: [
           {
-            url: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/StructureDefinition/facility-level`,
+            url: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/StructureDefinition/facility-level`,
             valueCodeableConcept: {
               coding: [
                 {
-                  system: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/StructureDefinition/facility-level`,
+                  system: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/StructureDefinition/facility-level`,
                   code: providerData.level,
                   display: providerData.level
                 }
@@ -139,7 +139,7 @@ class FhirClaimBundleService {
       .map(p => p.trim())
       .filter(p => p !== '');
     return {
-      fullUrl: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Patient/${patientData.id}`,
+      fullUrl: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Patient/${patientData.id}`,
       resource: {
         gender: patientData.gender,
         birthDate: patientData.birthDate,
@@ -147,28 +147,28 @@ class FhirClaimBundleService {
         id: patientData.id,
         meta: {
           profile: [
-            `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/StructureDefinition/patient|1.0.0`
+            `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/StructureDefinition/patient|1.0.0`
           ]
         },
         identifier: [
           {
             use: 'official',
-            system: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/identifier/shanumber`,
+            system: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/identifier/shanumber`,
             value: patientData.id
           },
           {
             value: patientData.identifiers.find(i => i.system === 'NationalID')?.value,
             use: 'official',
-            system: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/identifier/phonenumber`
+            system: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/identifier/phonenumber`
           },
           {
             value: patientData.identifiers.find(i => i.system === 'NationalID')?.value,
             use: 'official',
-            system: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/identifier/nationalid`
+            system: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/identifier/nationalid`
           },
           {
             use: 'official',
-            system: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/identifier/other`,
+            system: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/identifier/other`,
             value: patientData.identifiers.find(i => i.system === 'NationalID')?.value
           }
         ],
@@ -188,11 +188,11 @@ class FhirClaimBundleService {
     const formatted = today.toISOString().split('T')[0];
 
     return {
-      fullUrl: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Claim/${!!is_bundle_only ? "{{$randomUUID}}" : uuidv4()}`,
+      fullUrl: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Claim/${!!is_bundle_only ? "{{$randomUUID}}" : uuidv4()}`,
       resource: {
         created: formData.billablePeriod.created,
         provider: {
-          reference: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Organization/${formData.provider.id}`
+          reference: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Organization/${formData.provider.id}`
         },
         supportingInfo: [
           {
@@ -217,13 +217,13 @@ class FhirClaimBundleService {
                   valueCodeableConcept: {
                     coding: [
                       {
-                        system: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/CodeSystem/attachment-type`,
+                        system: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/CodeSystem/attachment-type`,
                         code: "discharge-summary",
                         display: "Discharge Summary"
                       }
                     ]
                   },
-                  url: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/CodeSystem/attachment-type`
+                  url: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/CodeSystem/attachment-type`
                 }
               ]
             }
@@ -247,11 +247,11 @@ class FhirClaimBundleService {
               language: "en",
               extension: [
                 {
-                  url: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/CodeSystem/attachment-type`,
+                  url: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/CodeSystem/attachment-type`,
                   valueCodeableConcept: {
                     coding: [
                       {
-                        system: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/CodeSystem/attachment-type`,
+                        system: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/CodeSystem/attachment-type`,
                         code: "other",
                         display: "Other"
                       }
@@ -286,7 +286,7 @@ class FhirClaimBundleService {
           ]
         },
         patient: {
-          reference: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Patient/${formData.patient.id}`
+          reference: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Patient/${formData.patient.id}`
         },
         billablePeriod: {
           start: response ? `${formatted}T10:40:22+03:00` : `${formData.billablePeriod.billableStart}T10:40:22+03:00`,
@@ -298,7 +298,7 @@ class FhirClaimBundleService {
             diagnosisCodeableConcept: {
               coding: [
                 {
-                  system: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/terminology/CodeSystem/icd-10`,
+                  system: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/terminology/CodeSystem/icd-10`,
                   code: "BC00",
                   display: "Multiple valve disease"
                 }
@@ -326,26 +326,26 @@ class FhirClaimBundleService {
                 }
               },
               {
-                url: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/StructureDefinition/extension-patient-share`,
+                url: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/StructureDefinition/extension-patient-share`,
                 valueMoney: {
                   value: Number(response ? formData.approvedAmount : formData.total?.value),
                   currency: "KES"
                 }
               },
               {
-                url: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/StructureDefinition/extension-patientInvoiceIdentifier`,
+                url: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/StructureDefinition/extension-patientInvoiceIdentifier`,
                 valueIdentifier: {
-                  system: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/identifier/patientInvoice`,
+                  system: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/identifier/patientInvoice`,
                   value: `${formData.patient.id}-invoice-${is_bundle_only ? "{{$randomUUID}}" : uuidv4()}`
                 }
               }
             ],
-            url: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/StructureDefinition/extension-patientInvoice`
+            url: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/StructureDefinition/extension-patientInvoice`
           }
         ],
         identifier: [
           {
-            system: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/claim`,
+            system: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/claim`,
             value: !!is_bundle_only ? "{{$randomUUID}}" : uuidv4()
           }
         ],
@@ -365,7 +365,7 @@ class FhirClaimBundleService {
               {
                 code: item.code,
                 display: item.display,
-                system: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/CodeSystem/intervention-codes`
+                system: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/CodeSystem/intervention-codes`
               }
             ]
           },
@@ -395,14 +395,14 @@ class FhirClaimBundleService {
       {
         claim: {
           identifier: {
-            system: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/claim`,
+            system: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/claim`,
             value: preAuthResponseId
           }
         },
         relationship: {
           coding: [
             {
-              system: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/CodeSystem/claim-relation-type`,
+              system: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/CodeSystem/claim-relation-type`,
               code: "pre-auth"
             }
           ],
@@ -418,7 +418,7 @@ class FhirClaimBundleService {
     if (practitionerData.regNumber) {
       identifiers.push({
         use: 'official',
-        system: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Practitioner/PractitionerRegistrationNumber`,
+        system: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Practitioner/PractitionerRegistrationNumber`,
         value: practitionerData.regNumber
       });
     }
@@ -426,7 +426,7 @@ class FhirClaimBundleService {
     if (practitionerData.sladeCode) {
       identifiers.push({
         use: 'official',
-        system: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Practitioner/SladeCode`,
+        system: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Practitioner/SladeCode`,
         value: practitionerData.sladeCode
       });
     }
@@ -434,7 +434,7 @@ class FhirClaimBundleService {
     if (practitionerData.id) {
       identifiers.push({
         use: 'official',
-        system: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Practitioner/PractitionerRegistryID`,
+        system: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Practitioner/PractitionerRegistryID`,
         value: practitionerData.id
       });
     }
@@ -442,7 +442,7 @@ class FhirClaimBundleService {
     if (practitionerData.nationalID) {
       identifiers.push({
         use: 'official',
-        system: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Practitioner/National_ID`,
+        system: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Practitioner/National_ID`,
         value: practitionerData.nationalID
       });
     }
@@ -462,13 +462,13 @@ class FhirClaimBundleService {
     }
 
     return {
-      fullUrl: `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Practitioner/${practitionerData.id}`,
+      fullUrl: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Practitioner/${practitionerData.id}`,
       resource: {
         resourceType: "Practitioner",
         id: practitionerData.id,
         meta: {
           profile: [
-            `${is_dev ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/StructureDefinition/practitioner|1.0.0`
+            `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/StructureDefinition/practitioner|1.0.0`
           ]
         },
         active: practitionerData.status ?? true,
