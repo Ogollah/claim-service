@@ -18,7 +18,7 @@ class ClaimController {
    * @returns {string} API key
    */
   getApiKey = (isDev) => {
-    return isDev ? process.env.API_KEY_DEV : process.env.API_KEY;
+    return isDev === true ? process.env.API_KEY_DEV : process.env.API_KEY;
   }
 
   /**
@@ -27,7 +27,7 @@ class ClaimController {
    * @returns {string} API base URL
    */
   getApiBaseUrl = (isDev) => {
-    return isDev ? process.env.API_BASE_URL_DEV : process.env.API_BASE_URL;
+    return isDev === true ? process.env.API_BASE_URL_DEV : process.env.API_BASE_URL;
   }
 
   /**
