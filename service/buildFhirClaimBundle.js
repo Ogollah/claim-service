@@ -19,6 +19,115 @@ class FhirClaimBundleService {
     return undefined;
   }
 
+  // Helper method to get default attachments
+  _getDefaultAttachments(is_dev) {
+    return [
+      {
+        sequence: 1,
+        category: {
+          coding: [
+            {
+              system: `${FHIR_SERVER.TERMINOLOGY_URL}/CodeSystem/claiminformationcategory`,
+              code: "attachment",
+              display: "Attachment"
+            }
+          ]
+        },
+        valueAttachment: {
+          language: "en",
+          url: `${FHIR_SERVER.PROVIDER_URL}/media/edi/default.pdf`,
+          size: "15765",
+          title: "Claim Attachment.pdf",
+          contentType: "application/pdf",
+          extension: [
+            {
+              valueCodeableConcept: {
+                coding: [
+                  {
+                    system: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/CodeSystem/attachment-type`,
+                    code: "discharge-summary",
+                    display: "Discharge Summary"
+                  }
+                ]
+              },
+              url: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/CodeSystem/attachment-type`
+            }
+          ]
+        }
+      },
+      {
+        sequence: 2,
+        category: {
+          coding: [
+            {
+              system: `${FHIR_SERVER.TERMINOLOGY_URL}/CodeSystem/claiminformationcategory`,
+              code: "attachment",
+              display: "Attachment"
+            }
+          ]
+        },
+        valueAttachment: {
+          url: `${FHIR_SERVER.PROVIDER_URL}/media/edi/default.pdf`,
+          size: "15765",
+          title: "Lab Results.pdf",
+          contentType: "application/pdf",
+          language: "en",
+          extension: [
+            {
+              url: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/CodeSystem/attachment-type`,
+              valueCodeableConcept: {
+                coding: [
+                  {
+                    system: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/CodeSystem/attachment-type`,
+                    code: "other",
+                    display: "Other"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ];
+  }
+
+  // Helper method to transform custom attachments
+  _transformCustomAttachments(attachments, is_dev) {
+    return attachments.map((attachment, index) => ({
+      sequence: index + 1,
+      category: {
+        coding: [
+          {
+            system: `${FHIR_SERVER.TERMINOLOGY_URL}/CodeSystem/claiminformationcategory`,
+            code: "attachment",
+            display: "Attachment"
+          }
+        ]
+      },
+      valueAttachment: {
+        language: "en",
+        url: attachment.url, // Dynamic URL from frontend
+        size: "15765",
+        title: `${attachment.displayName}.pdf`,
+        contentType: "application/pdf",
+        extension: [
+          {
+            valueCodeableConcept: {
+              coding: [
+                {
+                  system: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/CodeSystem/attachment-type`,
+                  code: attachment.code,
+                  display: attachment.displayName
+                }
+              ]
+            },
+            url: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/CodeSystem/attachment-type`
+          }
+        ]
+      }
+    }));
+  }
+
   transformFormToFhirBundle(formData, preAuthResponseId = null, isDev = null) {
 
     const relatedId = formData?.relatedClaimId;
@@ -187,6 +296,11 @@ class FhirClaimBundleService {
     const today = new Date();
     const formatted = today.toISOString().split('T')[0];
 
+    // Determine which attachments to use - custom or default
+    const supportingInfo = formData.attachments && formData.attachments.length > 0
+      ? this._transformCustomAttachments(formData.attachments, is_dev)
+      : this._getDefaultAttachments(is_dev);
+
     return {
       fullUrl: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Claim/${!!is_bundle_only ? "{{$randomUUID}}" : uuidv4()}`,
       resource: {
@@ -194,74 +308,7 @@ class FhirClaimBundleService {
         provider: {
           reference: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/Organization/${formData.provider.id}`
         },
-        supportingInfo: [
-          {
-            sequence: 1,
-            category: {
-              coding: [
-                {
-                  system: `${FHIR_SERVER.TERMINOLOGY_URL}/CodeSystem/claiminformationcategory`,
-                  code: "attachment",
-                  display: "Attachment"
-                }
-              ]
-            },
-            valueAttachment: {
-              language: "en",
-              url: `${FHIR_SERVER.PROVIDER_URL}/media/edi/default.pdf`,
-              size: "15765",
-              title: "Claim Attachment.pdf",
-              contentType: "application/pdf",
-              extension: [
-                {
-                  valueCodeableConcept: {
-                    coding: [
-                      {
-                        system: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/CodeSystem/attachment-type`,
-                        code: "discharge-summary",
-                        display: "Discharge Summary"
-                      }
-                    ]
-                  },
-                  url: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/CodeSystem/attachment-type`
-                }
-              ]
-            }
-          },
-          {
-            sequence: 2,
-            category: {
-              coding: [
-                {
-                  system: `${FHIR_SERVER.TERMINOLOGY_URL}/CodeSystem/claiminformationcategory`,
-                  code: "attachment",
-                  display: "Attachment"
-                }
-              ]
-            },
-            valueAttachment: {
-              url: `${FHIR_SERVER.PROVIDER_URL}/media/edi/default.pdf`,
-              size: "15765",
-              title: "Lab Results.pdf",
-              contentType: "application/pdf",
-              language: "en",
-              extension: [
-                {
-                  url: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/CodeSystem/attachment-type`,
-                  valueCodeableConcept: {
-                    coding: [
-                      {
-                        system: `${is_dev === true ? FHIR_SERVER.DEV_URL : FHIR_SERVER.BASE_URL}/CodeSystem/attachment-type`,
-                        code: "other",
-                        display: "Other"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          }
-        ],
+        supportingInfo: supportingInfo,
         id: !!is_bundle_only ? "{{$randomUUID}}" : uuidv4(),
         status: "active",
         priority: {
