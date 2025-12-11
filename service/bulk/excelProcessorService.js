@@ -2,6 +2,7 @@ const ExcelJS = require('exceljs');
 const path = require('path');
 const fs = require('fs').promises;
 const { v4: uuidv4 } = require('uuid');
+const COPClaim = require('../../models/COP');
 
 class ExcelProcessorService {
     constructor() {
@@ -220,7 +221,8 @@ class ExcelProcessorService {
         worksheet.getRow(1).getCell(statusCol + 4).value = 'Processed At';
 
         // Update rows with results
-        results.forEach((result, index) => {
+        results.forEach(async (result, index) => {
+            
             const rowNumber = index + 2;
             if (worksheet.getRow(rowNumber)) {
                 worksheet.getRow(rowNumber).getCell(statusCol).value = result.status;
@@ -229,6 +231,7 @@ class ExcelProcessorService {
                 worksheet.getRow(rowNumber).getCell(statusCol + 3).value = result.error || '';
                 worksheet.getRow(rowNumber).getCell(statusCol + 4).value = new Date().toISOString();
             }
+
         });
 
         const resultFileName = `results_${path.basename(originalFilePath, '.xlsx')}_${Date.now()}.xlsx`;

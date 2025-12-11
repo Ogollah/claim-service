@@ -1,5 +1,6 @@
 const axios = require('axios');
 const logger = require('../utils/logger');
+const { getByClaimId } = require('../models/COP');
 
 class ApiClientService {
   constructor() {
@@ -142,6 +143,44 @@ class ApiClientService {
         environment: isDev ? 'Development' : 'QA'
       });
 
+      return {
+        success: false,
+        status: errorStatus,
+        error: errorData
+      };
+    }
+  }
+
+  async postCOPResponse(claimId, isRandom) {
+    try {
+      let copResponse = [];
+      
+      if (isRandom === false) {
+        copResponse = await getByClaimId(claimId);
+      }
+    
+      const randomValue = Math.random();
+      const isApproved = randomValue < 0.7 || copResponse.length > 0 
+      
+      const statusCode = isApproved ? 200 : 400;
+      
+      const responseData = {
+        claimId: claimId,
+        approved: isApproved,
+        details: isApproved 
+          ? 'Claim meets COP criteria' 
+          : 'Claim does not meet COP criteria'
+      };
+
+      return {
+        success: isApproved,
+        status: statusCode,
+        data: responseData
+      };
+      
+    } catch (error) {
+      const errorStatus = error.response?.status || 500;
+      const errorData = error.response?.data || { message: error.message };
       return {
         success: false,
         status: errorStatus,

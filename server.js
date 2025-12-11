@@ -12,6 +12,7 @@ const InterventionRoutes = require('./routes/InterventionRoutes');
 const TestCaseRoutes = require('./routes/TestCaseRoutes');
 const ResultRoutes = require('./routes/ResultRoutes');
 const BulkClaimRoutes = require('./routes/BulkClaimRoutes');
+const COPServiceRoutes = require('./routes/COPServiceRoutes');
 const logger = require('./utils/logger');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJSDoc = require('swagger-jsdoc');
@@ -64,7 +65,8 @@ app.use('/api/packages', PackageRoutes);
 app.use('/api/interventions', InterventionRoutes);
 app.use('/api/test-cases', TestCaseRoutes);
 app.use('/api/results', ResultRoutes);
-app.use('/api/claims/bundle', BulkClaimRoutes)
+app.use('/api/claims/bundle', BulkClaimRoutes);
+app.use('/api/cop', COPServiceRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

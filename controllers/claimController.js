@@ -4,6 +4,7 @@ const apiClientService = require('../service/apiClientService');
 const {
   FHIR_SERVER,
 } = require('../utils/constants');
+const COPClaim = require('../models/COP');
 
 class ClaimController {
   constructor() {
@@ -191,6 +192,13 @@ class ClaimController {
       }
 
       const result = await apiClientService.submitClaimBundle(fhirBundle, apiKey, isDev);
+      if (result.success) {
+        const claimId = result?.data?.entry?.find(entry =>
+        entry.resource?.resourceType === FHIR_SERVER.PATHS.CLAIM
+      )?.resource?.id ?? null;
+        await COPClaim.create(claimId);
+        console.log('Claim submission sussessful:', result);
+      }
 
       return res.status(result.success ? 200 : result.status || 400).json({
         success: result.success,

@@ -3,6 +3,7 @@ const excelProcessorService = require('./excelProcessorService');
 const buildFhirClaimBundle = require('../buildFhirClaimBundle');
 const apiClientService = require('../apiClientService');
 const { v4: uuidv4 } = require('uuid');
+const COPClaim = require('../../models/COP');
 const {
     FHIR_SERVER,
 } = require('../../utils/constants');
@@ -136,8 +137,13 @@ class BulkClaimProcessorService extends EventEmitter {
         }
     }
 
-    async _processClaimsBatch(claimsBatch, isDev, apiKey) {
-        const promises = claimsBatch.map(async (claimData) => {
+   async _processClaimsBatch(claimsBatch, isDev, apiKey) {
+    const results = [];
+    
+    // Process in smaller chunks with better error handling
+    for (let i = 0; i < claimsBatch.length; i += this.concurrency) {
+        const batch = claimsBatch.slice(i, i + this.concurrency);
+        const batchPromises = batch.map(async (claimData) => {
             try {
                 const isPreauth = claimData.formData.use === 'preauth-claim';
                 let preAuthResponseId = null;
@@ -173,7 +179,7 @@ class BulkClaimProcessorService extends EventEmitter {
                     let claimResponseResult = null;
 
                     for (let attempt = 0; attempt <= maxRetries; attempt++) {
-                        claimResponseResult = await apiClientService.getClaimResponse(preAuthResponseId, apiKey, isDev);
+                        claimResponseResult = await apiClientService(preAuthResponseId, apiKey, isDev);
 
                         if (!claimResponseResult.success) {
                             return {
@@ -204,11 +210,22 @@ class BulkClaimProcessorService extends EventEmitter {
 
                 const fhirBundle = buildFhirClaimBundle.transformFormToFhirBundle(claimData.formData, preAuthResponseId, isDev);
                 const result = await apiClientService.submitClaimBundle(fhirBundle, apiKey, isDev);
+                
 
-                const claimID = result.data.entry?.find(entry =>
+                const claimID = result.data?.entry?.find(entry =>
                     entry.resource?.resourceType === FHIR_SERVER.PATHS.CLAIM
                 )?.resource?.id ?? null;
 
+                if (result.success && claimID) {
+                    try {
+                        await COPClaim.create(claimID );
+                        console.log(`COPClaim created successfully for claim ID: ${claimID}`);
+                    } catch (dbError) {
+                        console.error(`Failed to create COPClaim for ${claimID}:`, dbError);
+                    }
+                } else {
+                    console.log(`No valid claim ID found or result not successful. Result success: ${result.success}, ClaimID: ${claimID}`);
+                }
 
                 return {
                     status: result.success ? 'success' : 'failed',
@@ -219,6 +236,7 @@ class BulkClaimProcessorService extends EventEmitter {
                     timestamp: new Date()
                 };
             } catch (error) {
+                console.error('Error processing claim:', error);
                 return {
                     status: 'failed',
                     claimId: null,
@@ -230,20 +248,34 @@ class BulkClaimProcessorService extends EventEmitter {
             }
         });
 
-        // Process with concurrency control
-        const results = [];
-        for (let i = 0; i < promises.length; i += this.concurrency) {
-            const batch = promises.slice(i, i + this.concurrency);
-            const batchResults = await Promise.all(batch);
-            results.push(...batchResults);
-
-            if (i + this.concurrency < promises.length) {
-                await this._delay(50);
+        // Process this batch
+        const batchResults = await Promise.allSettled(batchPromises);
+        
+        // Handle results
+        batchResults.forEach((result, index) => {
+            if (result.status === 'fulfilled') {
+                results.push(result.value);
+            } else {
+                console.error('Promise rejected:', result.reason);
+                results.push({
+                    status: 'failed',
+                    claimId: null,
+                    responseData: null,
+                    error: result.reason.message || 'Unknown error',
+                    originalData: claimsBatch[i + index] || {},
+                    timestamp: new Date()
+                });
             }
-        }
+        });
 
-        return results;
+        // Small delay between batches
+        if (i + this.concurrency < claimsBatch.length) {
+            await this._delay(50);
+        }
     }
+
+    return results;
+}
 
 
     _delay(ms) {

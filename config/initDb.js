@@ -88,6 +88,10 @@ const tableSchemas = {
     'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
     'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
     'FOREIGN KEY (testcase_id) REFERENCES testcase(id) ON DELETE CASCADE'
+  ],
+  copclaims: [
+    'id INT AUTO_INCREMENT PRIMARY KEY',
+    'claim_id VARCHAR(255) NOT NULL',
   ]
 };
 
