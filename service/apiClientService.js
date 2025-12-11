@@ -150,44 +150,56 @@ class ApiClientService {
       };
     }
   }
+  /**
+   * Posts a COP response for a given claim response
+   * @param {Object} claimResponse - The claim response object
+   * @param {boolean} isRandom - Whether to randomize approval
+   * @returns {Promise<Object>} API response
+   */
 
-  async postCOPResponse(claimId, isRandom) {
-    try {
-      let copResponse = [];
-      
-      if (isRandom === false) {
-        copResponse = await getByClaimId(claimId);
-      }
-    
-      const randomValue = Math.random();
-      const isApproved = randomValue < 0.7 || copResponse.length > 0 
-      
-      const statusCode = isApproved ? 200 : 400;
-      
-      const responseData = {
-        claimId: claimId,
-        approved: isApproved,
-        details: isApproved 
-          ? 'Claim meets COP criteria' 
-          : 'Claim does not meet COP criteria'
-      };
+  async postCOPResponse(claimResponse, isRandom = false) {
+  try {
+    let claimId;
+    let copResponse = [];
 
-      return {
-        success: isApproved,
-        status: statusCode,
-        data: responseData
-      };
-      
-    } catch (error) {
-      const errorStatus = error.response?.status || 500;
-      const errorData = error.response?.data || { message: error.message };
-      return {
-        success: false,
-        status: errorStatus,
-        error: errorData
-      };
+    if (isRandom === false) {
+      const ref = claimResponse?.request?.reference;
+      if (!ref) throw new Error('Missing claim reference');
+      claimId = ref.split('/')[1];
+      copResponse = await getByClaimId(claimId);
     }
+
+    const isApproved = isRandom
+      ? Math.random() < 0.7
+      : copResponse.length > 0;
+
+    const statusCode = isApproved ? 200 : 400;
+
+    const responseData = {
+      claimId,
+      approved: isApproved,
+      details: isApproved
+        ? 'Claim meets COP criteria'
+        : 'Claim does not meet COP criteria'
+    };
+
+    return {
+      success: isApproved,
+      status: statusCode,
+      data: responseData
+    };
+
+  } catch (error) {
+    const errorStatus = error.response?.status || 500;
+    const errorData = error.response?.data || { message: error.message };
+    return {
+      success: false,
+      status: errorStatus,
+      error: errorData
+    };
   }
+}
+
 
   /**
    * Health check for the API

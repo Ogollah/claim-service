@@ -5,10 +5,10 @@ const copServiceController = {
 
   postCOPResponse : async (req, res) => {
     try {
-      const claimID = req.body.claimId;
-      const isRandom = req.body.isRandom;
+      const response = req.body.response;
+      const isRandom = req?.param?.isRandom || false;
 
-      const serviceResult = await apiClientService.postCOPResponse(claimID, isRandom);
+      const serviceResult = await apiClientService.postCOPResponse(response, isRandom);
 
       // Handle service errors
       if (!serviceResult.success) {
